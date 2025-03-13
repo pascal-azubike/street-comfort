@@ -12,7 +12,7 @@ interface GenerateMetadataProps {
 export function generateMetadata({
     title,
     description,
-    image = '/og-image.jpg',
+    image = '/og-image.jpeg',
     noIndex = false,
     pathname = '',
 }: GenerateMetadataProps): Metadata {
