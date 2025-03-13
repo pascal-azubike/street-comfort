@@ -28,7 +28,7 @@ export default function Hero() {
                 <div className="absolute inset-0 bg-[#462901]/50" />
 
                 {/* Main Glassmorphism Container */}
-                <div className="absolute inset-0 flex items-center justify-center p-4">
+                <div className=" pt-12 inset-0 flex items-center justify-center p-4">
                     <div className="bg-white/10 w-[90vw] lg:w-[85vw] backdrop-blur-sm border py-4 border-white/20 rounded-3xl relative ">
                         {/* Header */}
                         <Navbar />
@@ -37,7 +37,7 @@ export default function Hero() {
                         <div className="flex flex-col gap-6 px-4 md:px-8 mt-8 md:mt-12 md:hidden lg:flex">
                             {/* Main Heading */}
                             <h1 className="reveal font-['Playfair_Display'] text-[40px] md:text-[50px] lg:text-[60px] text-white leading-[1.1] font-medium text-center md:text-left">
-                            Luxury Fashion<br />Collections
+                                Luxury Fashion<br />Collections
                             </h1>
 
                             {/* Content Grid */}
@@ -61,7 +61,7 @@ export default function Hero() {
                                 {/* Right Column */}
                                 <div className="space-y-6 flex flex-col items-center md:items-end">
                                     {/* 230K Badge */}
-                                    <div className="flex reveal lg:justify-end items-center gap-3 lg:-mt-20">
+                                    <div className="flex flex-wrap justify-center sm:justify-start reveal lg:justify-end items-center gap-3 lg:-mt-20 max-[380px]:justify-center">
                                         <div className="flex -space-x-2 rounded-full bg-white/20 backdrop-blur-sm py-2 px-2">
                                             {[1, 2, 3].map((i) => (
                                                 <div key={i} className="w-12 h-12 rounded-full border-[1.5px] border-white overflow-hidden">
@@ -80,7 +80,7 @@ export default function Hero() {
                                             </button>
                                         </div>
                                         {/* First Happy Clients */}
-                                        <div className="flex flex-col items-start gap-1">
+                                        <div className="flex flex-col items-start max-[380px]:items-center gap-1 min-w-[120px]">
                                             <span className="font-['Playfair_Display'] text-[48px] leading-[53px] text-white font-medium">
                                                 {count}K
                                             </span>
@@ -91,7 +91,7 @@ export default function Hero() {
                                     </div>
 
                                     {/* Featured Content */}
-                                    <div className="w-[280px] md:w-[340px] reveal delay-2">
+                                    <div className="max-w-[280px] md:w-[340px] reveal delay-2">
                                         <div className="bg-white/90 backdrop-blur-sm rounded-2xl">
                                             <div className="flex flex-row md:flex-col lg:flex-row items-center pl-2">
                                                 <Image
@@ -147,7 +147,7 @@ export default function Hero() {
                             {/* Right Column */}
                             <div className="space-y-6 flex flex-col items-center md:items-end  ">
                                 {/* 230K Badge */}
-                                <div className="flex  lg:justify-end items-center gap-3 lg:-mt-20">
+                                <div className="flex flex-wrap justify-center sm:justify-start reveal lg:justify-end items-center gap-3 lg:-mt-20 max-[380px]:justify-center">
                                     <div className="flex -space-x-2 rounded-full bg-white/20 backdrop-blur-sm py-2 px-2">
                                         {[1, 2, 3].map((i) => (
                                             <div key={i} className="w-8 h-8 rounded-full border-[1.5px] border-white overflow-hidden">
@@ -166,7 +166,7 @@ export default function Hero() {
                                         </button>
                                     </div>
                                     {/* Second Happy Clients */}
-                                    <div className="flex flex-col items-start gap-1">
+                                    <div className="flex flex-col items-start max-[380px]:items-center gap-1">
                                         <span className="font-['Playfair_Display'] text-[48px] leading-[53px] text-white font-medium">
                                             {count}K
                                         </span>

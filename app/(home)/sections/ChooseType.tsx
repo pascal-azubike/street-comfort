@@ -42,13 +42,13 @@ export default function ChooseType() {
 
   return (
     <section className="py-16 px-4 max-w-6xl mx-auto" ref={revealRef}>
-      <div className="lg:flex lg:gap-12 lg:items-start">
-        {/* Video Section - Left on large screens, top on smaller screens */}
-        <div className="lg:w-1/2 mb-12 lg:mb-0 reveal delay-1">
+      <div className="flex flex-col-reverse lg:flex-row lg:gap-12 lg:items-start">
+        {/* Video Section - Left on large screens, bottom on smaller screens */}
+        <div className="lg:w-1/2 mt-12 lg:mt-0 reveal delay-1">
           <CloudinaryVideo />
         </div>
 
-        {/* Content and Collections - Right on large screens, bottom on smaller screens */}
+        {/* Content and Collections - Right on large screens, top on smaller screens */}
         <div className="lg:w-1/2">
           <div className="text-left mb-8">
             <h2 className="reveal text-[#462901] text-4xl font-['Playfair_Display'] mb-4">
