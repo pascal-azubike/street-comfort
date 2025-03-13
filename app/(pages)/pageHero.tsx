@@ -13,7 +13,7 @@ interface PageHeroProps {
 
 function PageHero({ title, description }: PageHeroProps) {
   return (
-    <section className="relative h-[70vh] bg-[#FDF7F5]">
+    <section className="relative bg-[#FDF7F5]">
       {/* Background Image */}
       <Image
         src="/33.jpg"
@@ -27,7 +27,7 @@ function PageHero({ title, description }: PageHeroProps) {
       <div className="absolute inset-0 bg-[#462901]/50" />
 
       {/* Main Glassmorphism Container */}
-      <div className="absolute z-[101] inset-0 flex items-center justify-center p-4">
+      <div className=" pt-12 z-[101] inset-0 flex items-center justify-center p-4">
         <div className="bg-white/10 w-[90vw] lg:w-[75vw] backdrop-blur-sm border py-4 border-white/20 rounded-3xl relative ">
           {/* Header */}
           <Navbar />
