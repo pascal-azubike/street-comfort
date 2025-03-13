@@ -70,7 +70,7 @@ export function Feature({ icon, title, description, className = "" }: FeaturePro
 export default function Features() {
   const revealRef = useReveal()
   return (
-    <section className="container mx-auto" ref={revealRef}>
+    <section className="" ref={revealRef}>
       <div className="">
         {/* Features Grid */}
         <div className="bg-[#F7F1EA] backdrop-blur-sm p-7">

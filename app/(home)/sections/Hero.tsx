@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { useReveal } from "@/hooks/useReveal"
 import Navbar from "@/components/Navbar"
 import { useCountAnimation } from "@/hooks/useCountAnimation"
+import Link from "next/link"
 
 export default function Hero() {
     const revealRef = useReveal()
@@ -66,10 +67,10 @@ export default function Hero() {
                                             {[1, 2, 3].map((i) => (
                                                 <div key={i} className="w-12 h-12 rounded-full border-[1.5px] border-white overflow-hidden">
                                                     <Image
-                                                        src={`/client-${i}.jpg`}
-                                                        alt={`Client ${i}`}
-                                                        width={48}
-                                                        height={48}
+                                                        src={`/customer-${i}.jpeg`}
+                                                        alt={`customer${i}`}
+                                                        width={100}
+                                                        height={100}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 </div>
@@ -95,7 +96,7 @@ export default function Hero() {
                                         <div className="bg-white/90 backdrop-blur-sm rounded-2xl">
                                             <div className="flex flex-row md:flex-col lg:flex-row items-center pl-2">
                                                 <Image
-                                                    src="/readmore.jpg"
+                                                    src="/street-cap.jpeg"
                                                     alt="Beautiful Jewelry"
                                                     width={280}
                                                     height={180}
@@ -106,7 +107,7 @@ export default function Hero() {
                                                         Beautiful In Every Detail
                                                     </h3>
                                                     <div className="flex items-center justify-start md:justify-center lg:justify-start gap-2 text-[#593c2d] group cursor-pointer">
-                                                        <span className="font-sans text-base">Read More</span>
+                                                        <Link href="/blog/6" className="font-sans text-base">Read More</Link>
                                                         <ArrowRight size={16} className="stroke-2 group-hover:translate-x-1 transition-transform duration-300" />
                                                     </div>
                                                 </div>
@@ -152,8 +153,8 @@ export default function Hero() {
                                         {[1, 2, 3].map((i) => (
                                             <div key={i} className="w-8 h-8 rounded-full border-[1.5px] border-white overflow-hidden">
                                                 <Image
-                                                    src={`/client-${i}.jpg`}
-                                                    alt={`Client ${i}`}
+                                                    src={`/customer-${i}.jpeg`}
+                                                    alt={`customer${i}`}
                                                     width={32}
                                                     height={32}
                                                     className="w-full h-full object-cover"
@@ -181,7 +182,7 @@ export default function Hero() {
                                     <div className="bg-white/90 backdrop-blur-sm rounded-2xl">
                                         <div className="flex flex-row md:flex-col lg:flex-row">
                                             <Image
-                                                src="/readmore.jpg"
+                                                src="/street-cap.jpeg"
                                                 alt="Beautiful Jewelry"
                                                 width={280}
                                                 height={180}
@@ -192,7 +193,7 @@ export default function Hero() {
                                                     Beautiful In Every Detail
                                                 </h3>
                                                 <div className="flex items-center justify-start md:justify-center lg:justify-start gap-2 text-[#593c2d] group cursor-pointer">
-                                                    <span className="font-sans text-base">Read More</span>
+                                                    <Link href="/blog/6" className="font-sans text-base">Read More</Link>
                                                     <ArrowRight size={16} className="stroke-2 group-hover:translate-x-1 transition-transform duration-300" />
                                                 </div>
                                             </div>

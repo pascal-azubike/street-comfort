@@ -165,6 +165,39 @@ export const blogPosts: BlogPost[] = [
       <h2>Investment Pieces</h2>
       <p>Guide to collecting and investing in Nigerian accessories, from traditional coral beads to contemporary designer pieces.</p>
     `
+  },
+  {
+    id: 6,
+    title: "Street Comfort: Beautiful In Every Way",
+    excerpt: "Discover how Street Comfort is revolutionizing Nigerian streetwear with authentic designs and premium quality.",
+    date: "March 20, 2024",
+    image: "/street-cap.jpeg",
+    category: "Street Fashion",
+    readTime: "8 min",
+    content: `
+      <h2>The Street Comfort Revolution</h2>
+      <p>Street Comfort stands at the intersection of Nigerian cultural heritage and contemporary street fashion, creating a unique narrative in the global streetwear scene. Founded in Lagos, this revolutionary brand has become more than just a clothing line – it's a movement celebrating authenticity, comfort, and cultural pride.</p>
+
+      <h3>The Street Comfort Philosophy</h3>
+      <p>At its core, Street Comfort believes in three fundamental principles: authentic Nigerian design elements, premium quality materials, and contemporary street culture integration.</p>
+
+      <h2>Our Collections</h2>
+      <h3>The Urban Heritage Line</h3>
+      <p>Our flagship collection features premium streetwear pieces that blend traditional Nigerian patterns with modern silhouettes. Each piece is crafted from high-quality, sustainable materials, ensuring both comfort and durability.</p>
+      
+      <ul>
+        <li>Premium Cotton Hoodies with Adire Patterns</li>
+        <li>Street-Smart Cargo Pants with Traditional Motifs</li>
+        <li>Limited Edition Graphic Tees featuring Nigerian Art</li>
+        <li>Custom-Designed Sneakers with Local Artwork</li>
+      </ul>
+
+      <h2>Quality and Community Impact</h2>
+      <p>Every Street Comfort piece undergoes rigorous quality control while maintaining our commitment to community development through youth empowerment programs and local artist collaborations.</p>
+
+      <h2>The Future of Street Fashion</h2>
+      <p>As we continue to grow, Street Comfort remains dedicated to expanding sustainable practices, introducing innovative designs, and representing Nigerian culture globally. Visit our flagship store in Lagos to experience the perfect blend of comfort, style, and cultural pride.</p>
+    `
   }
 ]
 
