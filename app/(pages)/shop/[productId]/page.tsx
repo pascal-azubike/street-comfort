@@ -23,6 +23,8 @@ import { useRouter } from 'next/navigation';
 // Import the utility functions
 import { useSession } from 'next-auth/react';
 import { usewishList } from '@/store/use-wishlist';
+// import { generateMetadata } from '@/lib/metadata';
+import { Metadata } from 'next';
 
 interface Product {
   _id: string;
@@ -60,6 +62,30 @@ async function fetchProduct(productId: string) {
     throw new Error('An unexpected error occurred');
   }
 }
+
+interface Props {
+  params: { productId: string }
+}
+
+// export async function generateMetadata({ params }: Props): Promise<Metadata> {
+//   try {
+//     const product = await fetchProduct(params.productId)
+    
+//     return generateMetadata({
+//       title: product.name,
+//       description: product.description,
+//       image: product.images[0],
+//       pathname: `/shop/${params.productId}`,
+//     })
+//   } catch (error) {
+//     return generateMetadata({
+//       title: 'Product Not Found',
+//       description: 'The requested product could not be found.',
+//       noIndex: true,
+//       pathname: `/shop/${params.productId}`,
+//     })
+//   }
+// }
 
 export default function ProductDetail({
   params: paramsPromise,

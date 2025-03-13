@@ -8,6 +8,14 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { generateMetadata } from '@/app/lib/metadata';
+
+export const metadata = generateMetadata({
+  title: "Contact Street Comfort | Get in Touch",
+  description: "Contact Street Comfort for inquiries about our Nigerian streetwear collection, collaborations, or customer support. We're here to help with all your fashion needs.",
+  pathname: '/contact-us',
+})
+
 export default function ContactUs() {
     const [formData, setFormData] = useState({
         name: '',

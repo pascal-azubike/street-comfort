@@ -69,11 +69,6 @@ const userMenuItems = [
 
 const adminMenuItems = [
   {
-    label: "Dashboard",
-    href: "/admin/dashboard",
-    icon: LayoutDashboard
-  },
-  {
     label: "Create Blog",
     href: "/blog/create",
     icon: FileText
@@ -199,14 +194,14 @@ export function NavDropdown({
                         <p className="text-xs font-medium text-[#593C2D]/60 mb-2 font-['Segoe_UI']">Admin</p>
                         <div className="space-y-1">
                           {adminMenuItems.map((item) => (
-                            <button
+                            <Link
                               key={item.href}
+                              href={item.href}
                               className="w-full text-left px-3 py-2 rounded-lg text-[#593C2D] hover:bg-[#593C2D]/5 transition-colors flex items-center gap-2 text-sm font-['Segoe_UI']"
-                              onClick={() => handleNavigation(item.href)}
                             >
                               <item.icon className="h-4 w-4" />
                               <span>{item.label}</span>
-                            </button>
+                            </Link>
                           ))}
                         </div>
                       </div>
@@ -218,14 +213,14 @@ export function NavDropdown({
                     <p className="text-xs font-medium text-[#593C2D]/60 mb-2 font-['Segoe_UI']">Account</p>
                     <div className="space-y-1">
                       {userMenuItems.map((item) => (
-                        <button
+                        <Link
                           key={item.href}
+                          href={item.href}
                           className="w-full text-left px-3 py-2 rounded-lg text-[#593C2D] hover:bg-[#593C2D]/5 transition-colors flex items-center gap-2 text-sm font-['Segoe_UI']"
-                          onClick={() => handleNavigation(item.href)}
                         >
                           <item.icon className="h-4 w-4" />
                           <span>{item.label}</span>
-                        </button>
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -283,14 +278,14 @@ export function NavDropdown({
                     Admin
                   </div>
                   {adminMenuItems.map((item) => (
-                    <button
+                    <Link
                       key={item.href}
+                      href={item.href}
                       className="w-full text-left px-2 py-1.5 rounded-lg text-[#593C2D] hover:bg-[#593C2D]/10 transition-colors flex items-center gap-2"
-                      onClick={() => handleNavigation(item.href)}
                     >
                       <item.icon className="h-4 w-4" />
                       <span className="font-['Segoe_UI']">{item.label}</span>
-                    </button>
+                    </Link>
                   ))}
                   <div className="h-px bg-[#593C2D]/10 my-2" />
                 </>
@@ -301,14 +296,14 @@ export function NavDropdown({
                 Account
               </div>
               {userMenuItems.map((item) => (
-                <button
+                <Link
                   key={item.href}
+                  href={item.href}
                   className="w-full text-left px-2 py-1.5 rounded-lg text-[#593C2D] hover:bg-[#593C2D]/10 transition-colors flex items-center gap-2"
-                  onClick={() => handleNavigation(item.href)}
                 >
                   <item.icon className="h-4 w-4" />
                   <span className="font-['Segoe_UI']">{item.label}</span>
-                </button>
+                </Link>
               ))}
 
               {/* Sign Out Button */}

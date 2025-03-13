@@ -4,6 +4,34 @@ import Image from "next/image"
 import { blogPosts } from "@/components/blog/blog-content"
 import { useParams } from "next/navigation"
 import { PageHero } from "../../pageHero"
+import { JsonLd } from 'react-schemaorg'
+import type { BlogPosting, WithContext } from 'schema-dts'
+// import { generateMetadata } from '@/lib/metadata'
+import { Metadata } from 'next'
+
+interface Props {
+    params: { blogId: string }
+}
+
+// export async function generateMetadata({ params }: Props): Promise<Metadata> {
+//     const post = blogPosts.find(post => post.id.toString() === params.blogId)
+    
+//     if (!post) {
+//         return generateMetadata({
+//             title: 'Blog Post Not Found',
+//             description: 'The requested blog post could not be found.',
+//             noIndex: true,
+//             pathname: `/blog/${params.blogId}`,
+//         })
+//     }
+
+//     return generateMetadata({
+//         title: post.title,
+//         description: post.excerpt,
+//         image: post.image,
+//         pathname: `/blog/${params.blogId}`,
+//     })
+// }
 
 export default function BlogPost() {
     const params = useParams()
@@ -11,6 +39,22 @@ export default function BlogPost() {
 
     if (!post) {
         return <div>Post not found</div>
+    }
+
+    const blogStructuredData: WithContext<BlogPosting> = {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: post.title,
+        image: post.image,
+        datePublished: post.date,
+        publisher: {
+            '@type': 'Organization',
+            name: 'Street Comfort',
+            logo: {
+                '@type': 'ImageObject',
+                url: '/logo.png'
+            }
+        }
     }
 
     return (
@@ -56,6 +100,8 @@ export default function BlogPost() {
                     <div dangerouslySetInnerHTML={{ __html: post.content }} />
                 </div>
             </article>
+
+            <JsonLd<WithContext<BlogPosting>> item={blogStructuredData} />
         </div>
     )
 } 

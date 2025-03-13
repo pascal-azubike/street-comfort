@@ -25,6 +25,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { usewishList } from '@/store/use-wishlist';
+import { Metadata } from 'next'
+import { generateMetadata } from '@/app/lib/metadata';
+
 
 interface Product {
   _id: string;
@@ -84,6 +87,12 @@ async function fetchProducts({
     throw error;
   }
 }
+
+export const metadata = generateMetadata({
+  title: "Shop Nigerian Streetwear | Street Comfort",
+  description: "Shop premium Nigerian streetwear, featuring authentic urban fashion, hoodies, and t-shirts. Quality guaranteed with nationwide delivery. Sizes XS-XL available.",
+  pathname: '/shop',
+})
 
 export default function Shop() {
   const router = useRouter();

@@ -31,6 +31,23 @@ export default function Footer() {
 
   return (
     <footer className="bg-[#593C2D] font-['Segoe_UI'] text-white" ref={revealRef}>
+      <script type="application/ld+json">
+        {JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'LocalBusiness',
+          name: 'Street Comfort',
+          image: '/logo.png',
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: 'Jl. Wilis no.13',
+            addressLocality: 'Lagos',
+            addressCountry: 'NG'
+          },
+          openingHours: 'Mo-Sa 09:00-19:00',
+          telephone: '+234 806 028 3727',
+          priceRange: '₦₦-₦₦₦'
+        })}
+      </script>
       <div className="max-w-6xl mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Section */}
