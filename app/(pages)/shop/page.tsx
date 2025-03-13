@@ -11,10 +11,6 @@ export const metadata = generateMetadata({
 export default function Shop() {
   return (
     <div>
-      <PageHero
-        title="Nigerian Fashion Store | Shop Quality Clothing"
-        description="Affordable Nigerian streetwear, t-shirts, hoodies & complete sets. Quality guaranteed with nationwide delivery."
-      />
       <ShopContent />
     </div>
   )
