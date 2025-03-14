@@ -5,7 +5,7 @@ import { Volume2, VolumeX } from "lucide-react";
 const CloudinaryVideo = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
 
   // Cloudinary optimization parameters
   const baseUrl = "https://res.cloudinary.com/dt3kpifmp/video/upload/";

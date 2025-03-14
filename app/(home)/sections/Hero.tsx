@@ -7,10 +7,18 @@ import { useReveal } from "@/hooks/useReveal"
 import Navbar from "@/components/Navbar"
 import { useCountAnimation } from "@/hooks/useCountAnimation"
 import Link from "next/link"
+import { useState } from "react"
+import { ReviewForm } from "../components/review-form"
 
 export default function Hero() {
     const revealRef = useReveal()
     const count = useCountAnimation(230)
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
+
+    const handleReviewClick = () => {
+        console.log("Review clicked")
+        setIsReviewModalOpen(true)
+    }
 
     return (
         <div className="bg-[#462901]">
@@ -50,13 +58,15 @@ export default function Hero() {
                                         Where Nigerian street culture meets modern fashion. Premium streetwear for the bold and authentic.
                                     </p>
 
-                                    <Button
-                                        variant="outline"
-                                        className="w-fit reveal delay-2 font-sans text-base leading-[25px] bg-white text-[#5C4434] hover:bg-[#5C4434] hover:text-white px-6 md:px-8 py-4 md:py-6 rounded-full group transition-all duration-300 ease-in-out hover:scale-[1.02]"
-                                    >
-                                        Let's Get Started
-                                        <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                                    </Button>
+                                    <Link href="/shop">
+                                        <Button
+                                            variant="outline"
+                                            className="w-fit reveal delay-2 font-sans text-base leading-[25px] bg-white text-[#5C4434] hover:bg-[#5C4434] hover:text-white px-6 md:px-8 py-4 md:py-6 rounded-full group transition-all duration-300 ease-in-out hover:scale-[1.02]"
+                                        >
+                                            Let's Get Started
+                                            <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                                        </Button>
+                                    </Link>
                                 </div>
 
                                 {/* Right Column */}
@@ -76,7 +86,10 @@ export default function Hero() {
                                                 </div>
                                             ))}
                                             {/* First plus button */}
-                                            <button className="w-12 h-12 rounded-full border-[1.5px] bg-white text-[#5C4434] border-white overflow-hidden flex items-center justify-center text-xl transition-all duration-300 hover:bg-[#5C4434] hover:text-white hover:scale-105 hover:shadow-lg transform">
+                                            <button 
+                                                onClick={handleReviewClick}
+                                                className="w-12 h-12 rounded-full border-[1.5px] bg-white text-[#5C4434] border-white overflow-hidden flex items-center justify-center text-xl transition-all duration-300 hover:bg-[#5C4434] hover:text-white hover:scale-105 hover:shadow-lg transform"
+                                            >
                                                 +
                                             </button>
                                         </div>
@@ -123,7 +136,7 @@ export default function Hero() {
                             <div className=" ">
                                 {/* Main Heading */}
                                 <h1 className="font-['Playfair_Display'] text-[40px] md:text-[55px] lg:text-[70px] text-white leading-[1.1] font-medium text-center md:text-left">
-                                    Urban Style<br />Redefined
+                                Luxury Fashion<br />Collections
                                 </h1>
                                 {/* Content Grid */}
                                 <div className="">
@@ -134,13 +147,15 @@ export default function Hero() {
                                             Where Nigerian street culture meets modern fashion. Premium streetwear for the bold and authentic.
                                         </p>
 
-                                        <Button
-                                            variant="outline"
-                                            className="w-fit font-sans text-base leading-[25px] bg-white text-[#5C4434] hover:bg-[#5C4434] hover:text-white px-6 md:px-8 py-4 md:py-6 rounded-full group transition-all duration-300 ease-in-out hover:scale-[1.02]"
-                                        >
-                                            Let's Get Started
-                                            <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                                        </Button>
+                                        <Link href="/shop">
+                                            <Button
+                                                variant="outline"
+                                                className="w-fit font-sans text-base leading-[25px] bg-white text-[#5C4434] hover:bg-[#5C4434] hover:text-white px-6 md:px-8 py-4 md:py-6 rounded-full group transition-all duration-300 ease-in-out hover:scale-[1.02]"
+                                            >
+                                                Let's Get Started
+                                                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                                            </Button>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
@@ -162,7 +177,10 @@ export default function Hero() {
                                             </div>
                                         ))}
                                         {/* Second plus button */}
-                                        <button className="w-12 h-12 rounded-full border-[1.5px] bg-white text-[#5C4434] border-white overflow-hidden flex items-center justify-center text-xl transition-all duration-300 hover:bg-[#5C4434] hover:text-white hover:scale-105 hover:shadow-lg transform">
+                                        <button 
+                                            onClick={handleReviewClick}
+                                            className="w-12 h-12 rounded-full border-[1.5px] bg-white text-[#5C4434] border-white overflow-hidden flex items-center justify-center text-xl transition-all duration-300 hover:bg-[#5C4434] hover:text-white hover:scale-105 hover:shadow-lg transform"
+                                        >
                                             +
                                         </button>
                                     </div>
@@ -205,6 +223,10 @@ export default function Hero() {
                     </div>
                 </div>
             </section>
+            <ReviewForm 
+                isOpen={isReviewModalOpen} 
+                onClose={() => setIsReviewModalOpen(false)} 
+            />
         </div>
     )
 }
