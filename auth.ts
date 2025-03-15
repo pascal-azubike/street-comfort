@@ -64,16 +64,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 const transport = nodemailer.createTransport(typeof server === 'string' ? server : {
                     host: serverConfig.host,
                     port: serverConfig.port,
-                    secure: true, // Force SSL/TLS
+                    secure: serverConfig.port === 465, // true for 465, false for other ports
                     auth: {
                         user: serverConfig.auth.user,
                         pass: serverConfig.auth.pass,
                     },
-                    tls: {
-                        // Do not fail on invalid certs
-                        rejectUnauthorized: false,
-                        minVersion: "TLSv1.2"
-                    }
+                   
                 });
 
                 const { host } = new URL(url)
