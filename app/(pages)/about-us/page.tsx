@@ -58,7 +58,13 @@ export default function AboutUs() {
               {values.map((value, index) => (
                 <div key={index} className="bg-white rounded-xl p-6 space-y-4">
                   <div className="w-12 h-12 rounded-full bg-[#593C2D]/10 flex items-center justify-center">
-                    {value.icon}
+                    <Image
+                      src={value.icon}
+                      alt={value.title}
+                      width={48}
+                      height={48}
+                      className="object-cover"
+                    />
                   </div>
                   <h3 className="text-xl font-['Playfair_Display'] text-[#593C2D]">
                     {value.title}
@@ -113,17 +119,17 @@ export default function AboutUs() {
 
 const values = [
   {
-    icon: '🎨',
+    icon: '/icons/authentic-design.png',
     title: 'Authentic Design',
     description: 'Every piece tells a story of Nigerian creativity and urban culture.',
   },
   {
-    icon: '✨',
+    icon: '/icons/quality-first.png',
     title: 'Quality First',
     description: 'We use premium materials and craftsmanship in every garment.',
   },
   {
-    icon: '🌍',
+    icon: '/icons/sustainable.png',
     title: 'Sustainable Fashion',
     description: 'Creating fashion that respects both people and the environment.',
   },

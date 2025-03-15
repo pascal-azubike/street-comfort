@@ -1,14 +1,18 @@
 import NextAuth from "next-auth"
 import { MongoDBAdapter } from "@auth/mongodb-adapter"
-import Nodemailer from "next-auth/providers/nodemailer"
+import EmailProvider from "next-auth/providers/nodemailer"
 import Google from "next-auth/providers/google"
 import clientPromise from "./lib/mongodb"
 import { ObjectId } from "mongodb"
+import nodemailer from 'nodemailer'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter: MongoDBAdapter(clientPromise),
+    
     pages: {
         signIn: '/auth/signin',
+        error: '/auth/error',
+        verifyRequest: '/auth/verify-request',
     },
     callbacks: {
         async session({ session, user }) {
@@ -32,20 +36,162 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
     },
     providers: [
-        Google, 
-        Nodemailer({
+        Google({
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        }), 
+        EmailProvider({
             server: {
                 host: process.env.EMAIL_SERVER_HOST,
                 port: Number(process.env.EMAIL_SERVER_PORT),
+                secure: true,
                 auth: {
                     user: process.env.EMAIL_SERVER_USER,
                     pass: process.env.EMAIL_SERVER_PASSWORD,
                 },
             },
             from: process.env.EMAIL_FROM,
+            async sendVerificationRequest({
+                identifier: email,
+                url,
+                provider: { server, from }
+            }) {
+                const { host } = new URL(url)
+                const transport = nodemailer.createTransport(server)
+                
+                const emailTemplate = `
+                    <!DOCTYPE html>
+                    <html>
+                        <head>
+                            <style>
+                                body {
+                                    font-family: Arial, sans-serif;
+                                    line-height: 1.6;
+                                    color: #E6DDD6;
+                                    max-width: 600px;
+                                    margin: 0 auto;
+                                    background-color: #1A1A1A;
+                                }
+                                .email-container {
+                                    padding: 30px;
+                                    background-color: #2A2A2A;
+                                    border-radius: 12px;
+                                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                                    margin: 20px;
+                                }
+                                .header {
+                                    text-align: center;
+                                    padding: 20px 0;
+                                    border-bottom: 2px solid #593C2D;
+                                    margin-bottom: 30px;
+                                }
+                                .logo {
+                                    font-size: 28px;
+                                    font-weight: bold;
+                                    color: #E6DDD6;
+                                    margin-bottom: 10px;
+                                }
+                                .content {
+                                    background: #333333;
+                                    padding: 25px;
+                                    border-radius: 8px;
+                                    margin: 20px 0;
+                                    text-align: center;
+                                }
+                                .button {
+                                    display: inline-block;
+                                    padding: 12px 24px;
+                                    background-color: #593C2D;
+                                    color: white;
+                                    text-decoration: none;
+                                    border-radius: 6px;
+                                    margin: 20px 0;
+                                    box-shadow: 0 0 10px #593C2D,
+                                              0 0 20px #593C2D,
+                                              0 0 30px #593C2D;
+                                }
+                                .neon-text {
+                                    text-shadow: 0 0 5px #fff,
+                                               0 0 10px #fff,
+                                               0 0 15px #593C2D,
+                                               0 0 20px #593C2D;
+                                }
+                                .neon-border {
+                                    border: 1px solid #593C2D;
+                                    box-shadow: 0 0 5px #593C2D,
+                                              inset 0 0 5px #593C2D;
+                                    padding: 15px;
+                                    border-radius: 8px;
+                                }
+                                .footer-button {
+                                    display: inline-block;
+                                    padding: 8px 16px;
+                                    background-color: #593C2D;
+                                    color: white;
+                                    text-decoration: none;
+                                    border-radius: 4px;
+                                    margin: 0 5px;
+                                    box-shadow: 0 0 5px #593C2D;
+                                }
+                                .footer {
+                                    text-align: center;
+                                    color: #8B7B73;
+                                    font-size: 14px;
+                                    margin-top: 20px;
+                                }
+                                .footer-links a {
+                                    color: #E6DDD6;
+                                    text-decoration: none;
+                                    margin: 0 10px;
+                                }
+                                .footer-links a:hover {
+                                    text-decoration: underline;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="email-container">
+                                <div class="header">
+                                    <div class="logo">STREET COMFORT</div>
+                                </div>
+                                
+                                <div class="content neon-border">
+                                    <h2 style="color: #E6DDD6;" class="neon-text">Sign in to Street Comfort</h2>
+                                    <p>Click the button below to sign in to your account.</p>
+                                    <p>If you didn't request this email, you can safely ignore it.</p>
+                                    <a href="${url}" class="button">Sign in to Street Comfort</a>
+                                    <p style="margin-top: 20px; font-size: 14px; color: #8B7B73;">
+                                        This link will expire in 24 hours.
+                                    </p>
+                                </div>
+                                
+                                <div class="footer">
+                                    <p>Street Comfort Nigeria</p>
+                                    <div class="footer-links">
+                                        <a href="https://www.streetcomfortwear.com" class="footer-button">Home</a>
+                                        <a href="https://www.streetcomfortwear.com/shop" class="footer-button">Shop</a>
+                                    </div>
+                                    <p>This email was sent to ${email}</p>
+                                </div>
+                            </div>
+                        </body>
+                    </html>
+                `
+
+                await transport.sendMail({
+                    to: email,
+                    from: {
+                        name: "Street Comfort",
+                        address: from!,
+                    },
+                    subject: `Sign in to Street Comfort`,
+                    html: emailTemplate,
+                })
+            },
         })
     ],
 })
+
 
 
 
