@@ -135,12 +135,11 @@ export default function Collections() {
   }
 
   return (
-    <section className="py-16 my-24 m-4 px-4 bg-[#FDF7F5] max-w-5xl  rounded-3xl mx-auto">
+    <section className="py-16 mb-24 m-4 px-4 bg-[#FDF7F5] max-w-5xl  rounded-3xl mx-auto">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col lg:flex-row container mx-auto gap-8 items-center">
           {/* Left Content - Hidden on medium and below */}
-          <div className="hidden self-start
-           lg:block lg:w-1/3 text-center lg:text-left">
+          <div className="hidden self-start lg:block lg:w-1/3 text-center lg:text-left sticky top-4">
             <h2 className="text-[#462901] text-4xl font-['Playfair_Display'] mb-4">
               Featured Collections
             </h2>

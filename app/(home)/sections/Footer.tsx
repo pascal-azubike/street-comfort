@@ -53,13 +53,14 @@ export default function Footer() {
           {/* Brand Section */}
           <div>
             <div className="reveal delay-1 flex items-center gap-2 mb-4">
-              <Image
-                src="/logo.png"
-                alt="websitelogo"
-                width={80}
-                height={80}
-              />
-
+              <Link href="/">
+                <Image
+                  src="/logo.png"
+                  alt="websitelogo"
+                  width={80}
+                  height={80}
+                />
+              </Link>
             </div>
             <p className="reveal delay-2 font-roboto text-[14px] leading-[26px] text-white/80">
               Discover our premium streetwear collection that combines modern style with everyday comfort. Each piece is crafted to bring you the best in contemporary fashion.
@@ -73,7 +74,7 @@ export default function Footer() {
               {collections.map((collection, index) => (
                 <li key={collection.title} className={`reveal delay-${index + 2}`}>
                   <Link
-                    href={`/shop?category=${collection.title.toLowerCase().replace(/\s+/g, '-')}`}
+                    href={`/shop?category=${collection.title.toLowerCase().replace(/\s+&\s+/g, '-')}`}
                     className="text-white/80 hover:text-white text-[14px] font-roboto transition-colors"
                   >
                     {collection.title}

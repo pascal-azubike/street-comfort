@@ -4,6 +4,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Star } from "lucide-react"
 import { useReveal } from "@/hooks/useReveal"
+import Link from "next/link"
 
 export default function ProductFeature() {
   const revealRef = useReveal()
@@ -26,7 +27,7 @@ export default function ProductFeature() {
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className="w-4 h-4 fill-[#593C2D] text-[#593C2D]"
+                        className="w-4 h-4 fill-yellow-400 text-yellow-400"
                       />
                     ))}
                   </div>
@@ -40,12 +41,14 @@ export default function ProductFeature() {
                 </p>
 
                 <div className="flex justify-center lg:justify-start">
-                  <Button
-                    variant="outline"
-                    className="border-[#593C2D] font-['Segoe_UI'] text-[#593C2D] hover:bg-[#593C2D] hover:text-white rounded-full px-8"
-                  >
-                    Shop Now
-                  </Button>
+                  <Link href="/shop/67d3e6dce19dc6e5e6dea034">
+                    <Button
+                      variant="outline"
+                      className="border-[#593C2D] font-['Segoe_UI'] text-[#593C2D] hover:bg-[#593C2D] hover:text-white rounded-full px-8"
+                    >
+                      Shop Now
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>

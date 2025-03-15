@@ -46,7 +46,7 @@ export default function Navbar() {
             <NavDropdown
               navItems={navigationItems}
               session={session}
-              variant="floating"
+             
             />
             {shopButton && (
               <NavItem

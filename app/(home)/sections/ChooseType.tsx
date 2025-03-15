@@ -5,10 +5,18 @@ import { useReveal } from "@/hooks/useReveal"
 import { ArrowRight } from "lucide-react"
 import Image from "next/image"
 import { collections, Collection } from "@/config/collections"
+import { useRouter } from 'next/navigation'
 
 function CategoryCard({ image, title, description }: Collection) {
+  const router = useRouter()
+
+  const handleCategoryClick = () => {
+    // Use the same normalization logic as shop-content.tsx
+    router.push(`/shop?category=${title.toLowerCase().replace(/\s+&\s+/g, '-')}`)
+  }
+
   return (
-    <div className="relative group cursor-pointer">
+    <div className="relative group cursor-pointer" onClick={handleCategoryClick}>
       <div className="bg-[#EBDBC2] rounded-xl p-4 flex items-center gap-4 
         hover:bg-[#EFE5D9] transition-all duration-300 ease-in-out 
         hover:shadow-md transform hover:-translate-y-1

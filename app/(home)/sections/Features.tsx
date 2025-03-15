@@ -3,6 +3,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useReveal } from "@/hooks/useReveal"
 import { useState, useRef, MouseEvent } from "react"
+import Link from "next/link"
 
 interface FeatureProps {
   icon: string
@@ -132,12 +133,14 @@ export default function Features() {
               Experience the fusion of Nigerian street culture and contemporary fashion. Our designs celebrate the vibrant spirit of Lagos while delivering unmatched comfort and style for the bold and authentic.
             </p>
             <div className="flex justify-center md:justify-start">
-              <Button
-                variant="outline"
-                className="reveal delay-3 border-[#593C2D] text-[#593C2D] hover:bg-[#593C2D] hover:text-white rounded-full px-8 py-2"
-              >
-                Learn More
-              </Button>
+              <Link href="/blog/5">
+                <Button
+                  variant="outline"
+                  className="reveal delay-3 border-[#593C2D] text-[#593C2D] hover:bg-[#593C2D] hover:text-white rounded-full px-8 py-2"
+                >
+                  Learn More
+                </Button>
+              </Link>
             </div>
           </div>
 

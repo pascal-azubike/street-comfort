@@ -4,6 +4,7 @@ import { useState } from "react"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 interface FAQItem {
   question: string
@@ -74,12 +75,14 @@ export function FAQContent({ variant = 'page', faqs = faqItems, showLearnMore = 
             Find quick answers to our most commonly asked questions.
           </p>
           {showLearnMore && (
-            <Button 
-              variant="outline" 
-              className="border-[#593C2D] text-[#593C2D] hover:bg-[#593C2D] hover:text-white rounded-full px-8"
-            >
-              View All FAQs
-            </Button>
+            <Link href="/faq">
+              <Button 
+                variant="outline" 
+                className="border-[#593C2D] text-[#593C2D] hover:bg-[#593C2D] hover:text-white rounded-full px-8"
+              >
+                View All FAQs
+              </Button>
+            </Link>
           )}
         </div>
       )}

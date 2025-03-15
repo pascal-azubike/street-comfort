@@ -104,9 +104,14 @@ export default function Cart() {
 
                   <div className="flex-1">
                     <div className="flex justify-between mb-2">
-                      <h3 className="font-['Playfair_Display'] text-[#593C2D]">
-                        {item.name}
-                      </h3>
+                      <Link 
+                        href={`/shop/${item._id}`}
+                        className="hover:text-[#593C2D]/80 transition-colors"
+                      >
+                        <h3 className="font-['Playfair_Display'] text-[#593C2D]">
+                          {item.name}
+                        </h3>
+                      </Link>
                       <button
                         onClick={() => removeItem(item._id)}
                         className="text-red-500 hover:text-red-600 disabled:opacity-50"
@@ -156,26 +161,26 @@ export default function Cart() {
           </div>
 
           {/* Order Summary */}
-          <div className="bg-white rounded-xl border border-[#593C2D]/10 p-6 h-fit space-y-6">
-            <h3 className="font-['Playfair_Display'] text-xl text-[#593C2D]">
-              Order Summary
-            </h3>
+          <div className="relative">
+            <div className="lg:sticky lg:top-24">
+              <div className="bg-white rounded-xl border border-[#593C2D]/10 p-6 h-fit space-y-6">
+                {status === 'authenticated' && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-[#593C2D]">Delivery Address</h4>
+                    <AddressSelector
+                      selectedAddressId={selectedAddressId}
+                      onAddressSelect={setSelectedAddressId}
+                      returnUrl="/cart"
+                    />
+                  </div>
+                )}
 
-            {status === 'authenticated' && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-[#593C2D]">Delivery Address</h4>
-                <AddressSelector
+                <OrderSummary 
+                  total={total} 
                   selectedAddressId={selectedAddressId}
-                  onAddressSelect={setSelectedAddressId}
-                  returnUrl="/cart"
                 />
               </div>
-            )}
-
-            <OrderSummary 
-              total={total} 
-              selectedAddressId={selectedAddressId}
-            />
+            </div>
           </div>
         </div>
       </div>

@@ -27,6 +27,7 @@ import { useSession } from 'next-auth/react';
 import { usewishList } from '@/store/use-wishlist';
 import { Metadata } from 'next'
 import { generateMetadata } from '@/app/lib/metadata';
+import { FloatingNav } from '@/components/ui/floating-navbar';
 
 
 interface Product {
@@ -110,6 +111,19 @@ export default function ShopComponent() {
     searchParams.get('sizes')?.split(',').filter(Boolean) || []
   );
 
+  useEffect(() => {
+    const category = searchParams.get('category');
+    if (category) {
+      // Normalize the category from URL
+      const normalizedCategory = category.toLowerCase().replace(/\s+/g, '-');
+      handleApplyFilters({
+        category: [normalizedCategory],
+        sort: 'createdAt-desc',
+        sizes: []
+      });
+    }
+  }, [searchParams]);
+
   // Query products
   const {
     data,
@@ -173,10 +187,19 @@ export default function ShopComponent() {
     sort: string;
     sizes: string[];
   }) => {
-    setSelectedCategory(newFilters.category);
+    // Normalize categories: replace spaces with hyphens and handle special cases
+    const normalizedCategories = newFilters.category.map(cat => {
+      // Special case for "complete sets"
+      if (cat.toLowerCase() === 'complete sets') {
+        return 'complete-sets';
+      }
+      return cat.toLowerCase().replace(/\s+/g, '-');
+    });
+    
+    setSelectedCategory(normalizedCategories);
     setSelectedSort(newFilters.sort);
     setSelectedSizes(newFilters.sizes);
-    updateUrl(newFilters);
+    updateUrl({ ...newFilters, category: normalizedCategories });
     queryClient.invalidateQueries({ queryKey: ['products'] });
   };
 
@@ -316,6 +339,16 @@ export default function ShopComponent() {
                 <div className="text-center text-red-500">
                   Error: {error.message}
                 </div>
+              ) : data?.pages[0]?.items?.length === 0 ? (
+                <div className="text-center py-10">
+                  <p className="text-[#593C2D]/60 text-lg">No products found matching your filters.</p>
+                  <Button 
+                    onClick={handleResetFilters}
+                    className="mt-4 bg-[#593C2D] hover:bg-[#593C2D]/90 text-white"
+                  >
+                    Reset Filters
+                  </Button>
+                </div>
               ) : data ? (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -353,7 +386,7 @@ export default function ShopComponent() {
                                       handleWishlistClick(e, product);
                                     }}
                                     className="absolute top-4 right-4 p-2 rounded-full bg-white/80 backdrop-blur-sm 
-                                               opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                                               md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300
                                                hover:bg-white text-[#593C2D]/60 hover:text-[#593C2D] z-20"
                                   >
                                     <Heart 
@@ -364,7 +397,9 @@ export default function ShopComponent() {
                                     />
                                   </button>
                                   {/* Add to Bag Button */}
-                                  <div className="absolute inset-0 flex items-end justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/10 to-transparent z-10">
+                                  <div className="absolute inset-0 flex items-end justify-center 
+                                                    md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 
+                                                    bg-gradient-to-t from-black/10 to-transparent z-10">
                                     <Button
                                       onClick={(e) => {
                                         e.preventDefault();
@@ -419,6 +454,16 @@ export default function ShopComponent() {
           </div>
         </div>
       </section>
+      <FloatingNav 
+        onApplyFilters={(filters) => {
+          handleApplyFilters({
+            category: filters.category,
+            sort: filters.sort,
+            sizes: filters.sizes
+          });
+        }}
+        onResetFilters={handleResetFilters}
+      />
     </div>
   );
 }

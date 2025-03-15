@@ -29,7 +29,12 @@ interface ExtendedSession extends Session {
   };
 }
 
-export function FloatingNav() {
+interface FloatingNavProps {
+  onApplyFilters?: (filters: { category: string[]; sort: string; sizes: string[] }) => void;
+  onResetFilters?: () => void;
+}
+
+export function FloatingNav({ onApplyFilters, onResetFilters }: FloatingNavProps) {
   const [isVisible, setIsVisible] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -110,7 +115,7 @@ export function FloatingNav() {
             
             {/* Shop Filter Button - Mobile Only */}
             {isShopPage && (
-              <div className="flex-1 flex justify-center">
+              <div className=" md:hidden flex-1 flex justify-center">
                 <DropdownMenu>
                   <DropdownMenuTrigger>
                     <Button variant="outline" size="sm" className="text-white bg-transparent border-white hover:text-white hover:bg-white/20">
@@ -127,12 +132,8 @@ export function FloatingNav() {
                       selectedCategory={['all']}
                       selectedSort="newest"
                       selectedSizes={[]}
-                      onApplyFilters={({ category, sort, sizes }) => {
-                        console.log({ category, sort, sizes });
-                      }}
-                      onResetFilters={() => {
-                        console.log('Filters reset');
-                      }}
+                      onApplyFilters={onApplyFilters || (() => {})}
+                      onResetFilters={onResetFilters || (() => {})}
                     />
                   </DropdownMenuContent>
                 </DropdownMenu>
