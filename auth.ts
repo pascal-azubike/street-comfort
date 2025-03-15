@@ -8,7 +8,7 @@ import nodemailer from 'nodemailer'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter: MongoDBAdapter(clientPromise),
-    
+
     pages: {
         signIn: '/auth/signin',
         error: '/auth/error',
@@ -20,7 +20,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 // Get additional user data from database
                 const client = await clientPromise
                 const db = client.db()
-                
+
                 const dbUser = await db.collection('users').findOne({
                     _id: new ObjectId(user.id)
                 })
@@ -39,7 +39,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        }), 
+        }),
         EmailProvider({
             server: {
                 host: process.env.EMAIL_SERVER_HOST,
@@ -60,14 +60,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 if (!serverConfig?.host || !serverConfig?.port) {
                     throw new Error('Server configuration is missing');
                 }
-                
+                console.log(serverConfig)
                 const transport = nodemailer.createTransport(typeof server === 'string' ? server : {
                     host: serverConfig.host,
                     port: serverConfig.port,
                     secure: true, // Force SSL/TLS
                     auth: {
-                        user: serverConfig.user,
-                        pass: serverConfig.password,
+                        user: serverConfig.auth.user,
+                        pass: serverConfig.auth.pass,
                     },
                     tls: {
                         // Do not fail on invalid certs
@@ -75,9 +75,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         minVersion: "TLSv1.2"
                     }
                 });
-                
+
                 const { host } = new URL(url)
-                
+
                 const emailTemplate = `
                     <!DOCTYPE html>
                     <html>
