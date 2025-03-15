@@ -54,10 +54,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             async sendVerificationRequest({
                 identifier: email,
                 url,
-                provider: { server, from }
+                provider: { server, from },
             }) {
+                const serverConfig = typeof server === 'string' ? server : server as any;
+                if (!serverConfig?.host || !serverConfig?.port) {
+                    throw new Error('Server configuration is missing');
+                }
+                
+                const transport = nodemailer.createTransport(typeof server === 'string' ? server : {
+                    host: serverConfig.host,
+                    port: serverConfig.port,
+                    secure: true, // Force SSL/TLS
+                    auth: {
+                        user: serverConfig.user,
+                        pass: serverConfig.password,
+                    },
+                    tls: {
+                        // Do not fail on invalid certs
+                        rejectUnauthorized: false,
+                        minVersion: "TLSv1.2"
+                    }
+                });
+                
                 const { host } = new URL(url)
-                const transport = nodemailer.createTransport(server)
                 
                 const emailTemplate = `
                     <!DOCTYPE html>
