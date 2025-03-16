@@ -6,11 +6,12 @@ import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMe
 import { Button } from "./button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, User, Package, ShoppingBag, Heart, Settings, LogOut, LayoutDashboard, Users, ClipboardList, ShoppingCart, FileText, MapPin, Edit } from "lucide-react";
-import { signIn, signOut } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Session } from "next-auth";
 import { NavItem } from "./nav-item";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 interface ExtendedUser {
   role?: string
@@ -99,11 +100,20 @@ export function NavDropdown({
   navItems, 
   isMobile, 
   triggerIcon = "user", 
-  className, 
+  className,
   session,
   variant = 'default' 
 }: NavDropdownProps) {
   const router = useRouter();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  const handleNavigation = (path: string) => {
+    router.push(path);
+  };
 
   // If not mobile and not logged in, render sign in button
   if (!isMobile && !session?.user) {
@@ -122,10 +132,6 @@ export function NavDropdown({
       </Button>
     );
   }
-
-  const handleNavigation = (path: string) => {
-    router.push(path);
-  };
 
   // Mobile menu uses Sheet (Drawer)
   if (isMobile) {
@@ -228,7 +234,7 @@ export function NavDropdown({
                   {/* Sign Out Button */}
                   <div className="pt-3 border-t border-[#593C2D]/10">
                     <button
-                      onClick={() => signOut()}
+                      onClick={handleLogout}
                       className="w-full text-left px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 text-sm font-['Segoe_UI']"
                     >
                       <LogOut className="h-4 w-4" />
@@ -310,7 +316,7 @@ export function NavDropdown({
               <div className="h-px bg-[#593C2D]/10 my-2" />
               <button
                 className="w-full text-left px-2 py-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors flex items-center gap-2"
-                onClick={() => signOut()}
+                onClick={handleLogout}
               >
                 <LogOut className="h-4 w-4" />
                 <span className="font-['Segoe_UI']">Sign out</span>
