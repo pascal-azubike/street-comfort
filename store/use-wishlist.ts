@@ -10,6 +10,7 @@ export interface wishListItem {
   size: string;
   image: string;
   category: string;
+  isAvailable?: boolean;
 }
 
 interface wishListStore {
@@ -41,7 +42,7 @@ export const usewishList = create<wishListStore>()(
 
           const response = await fetch('/api/wishlist');
           const data = await response.json();
-          set({ items: data.items });
+          set({ items: data });
         } catch (error) {
           console.error('Failed to fetch wishlist:', error);
           toast.error('Failed to load wishlist items');
@@ -56,19 +57,24 @@ export const usewishList = create<wishListStore>()(
             return;
           }
 
+          // Check if product exists in store
+          const productResponse = await fetch(`/api/products/${item._id}`);
+          if (!productResponse.ok) {
+            toast.error('This product is no longer available');
+            return;
+          }
+
           // Optimistically update UI
           const currentItems = get().items;
-          set({ items: [...currentItems, item] });
-
+          set({ items: [...currentItems, { ...item, isAvailable: true }] });
+          
           // Sync with database
           const response = await fetch('/api/wishlist', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-              items: [...currentItems, item],
-            }),
+            body: JSON.stringify({ ...item, isAvailable: true }),
           });
 
           if (!response.ok) {
@@ -98,14 +104,12 @@ export const usewishList = create<wishListStore>()(
           set({ items: newItems });
 
           // Sync with database
-          const response = await fetch('/api/wishlist', {
+          const response = await fetch('/api/wishlist/remove', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-              items: newItems,
-            }),
+            body: JSON.stringify({ itemId }),
           });
 
           if (!response.ok) {
@@ -134,14 +138,11 @@ export const usewishList = create<wishListStore>()(
           set({ items: [] });
 
           // Sync with database
-          const response = await fetch('/api/wishlist', {
+          const response = await fetch('/api/wishlist/clear', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              items: [],
-            }),
+            }
           });
 
           if (!response.ok) {
@@ -167,7 +168,7 @@ export const usewishList = create<wishListStore>()(
         try {
           const response = await fetch('/api/wishlist');
           if (!response.ok) throw new Error('Failed to fetch wishlist');
-          
+
           const items = await response.json();
           set({ items, isInitialized: true });
         } catch (error) {

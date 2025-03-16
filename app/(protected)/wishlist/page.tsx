@@ -26,7 +26,7 @@ export default function WishlistPage() {
     };
     fetchWishlist();
   }, [fetchItems]);
-
+console.log(items, "items");
   if (!session) {
     return (
       <>
@@ -62,7 +62,7 @@ export default function WishlistPage() {
     );
   }
 
-  if (!items.length) {
+  if (!items?.length) {
     return (
       <>
       <PageHero title="My Wishlist" description="View and manage your wishlist items." />
@@ -98,15 +98,22 @@ export default function WishlistPage() {
           {items.map(item => (
             <div
               key={item._id}
-              className="bg-white rounded-xl border border-[#593C2D]/10 overflow-hidden hover:shadow-lg transition-all duration-300"
+              className={`bg-white rounded-xl border ${item.isAvailable === false ? 'border-red-300/50' : 'border-[#593C2D]/10'} overflow-hidden hover:shadow-lg transition-all duration-300`}
             >
               <Link href={`/shop/${item._id}`}>
                 <div className="relative h-[300px]">
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="w-full h-full object-contain p-4"
+                    className={`w-full h-full object-contain p-4 ${item.isAvailable === false ? 'opacity-60' : ''}`}
                   />
+                  {item.isAvailable === false && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-red-50 px-4 py-2 rounded-md">
+                        <p className="text-red-600 text-sm font-semibold">No Longer Available</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </Link>
 
@@ -126,40 +133,56 @@ export default function WishlistPage() {
                     ₦{item.price}
                   </span>
                   <div className="flex gap-2">
-                    <Button
-                      onClick={() => {
-                        addItem({
-                          _id: item._id,
-                          name: item.name,
-                          price: item.price,
-                          quantity: 1,
-                          size: item.size,
-                          image: item.image,
-                          description: 'wishlist description',
-                          category: item.category,
-                          details:  [],
-                          images:  [item.image],
-                        });
-                        toast.success('Item added to cart');
-                      }}
-                      variant="default"
-                      size="sm"
-                      className="bg-[#593C2D] hover:bg-[#593C2D]/90 text-white"
-                    >
-                      <ShoppingCart className="h-4 w-4" />
-                    </Button>
+                    {item.isAvailable === false ? (
+                      <Button
+                        disabled
+                        variant="default"
+                        size="sm"
+                        className="bg-gray-300 hover:bg-gray-300 text-gray-500 cursor-not-allowed"
+                      >
+                        <ShoppingCart className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          addItem({
+                            _id: item._id,
+                            name: item.name,
+                            price: item.price,
+                            quantity: 1,
+                            size: item.size,
+                            image: item.image,
+                            description: 'wishlist description',
+                            category: item.category,
+                            details: [],
+                            images: [item.image],
+                          });
+                          toast.success('Item added to cart');
+                        }}
+                        variant="default"
+                        size="sm"
+                        className="bg-[#593C2D] hover:bg-[#593C2D]/90 text-white"
+                      >
+                        <ShoppingCart className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button
                       onClick={() => {
                         removeItem(item._id);
                       }}
-                      variant="outline"
+                      variant={item.isAvailable === false ? "destructive" : "outline"}
                       size="sm"
-                      className="border-[#593C2D]/20 hover:bg-[#593C2D]/5"
+                      className={item.isAvailable === false ? "" : "border-[#593C2D]/20 hover:bg-[#593C2D]/5"}
                     >
-                      <Trash className="h-4 w-4 text-[#593C2D]" />
+                      <Trash className={`h-4 w-4 ${item.isAvailable === false ? "text-white" : "text-[#593C2D]"}`} />
                     </Button>
                   </div>
                 </div>
+                {item.isAvailable === false && (
+                  <p className="mt-2 text-sm text-red-600">
+                    This item is no longer available. You may remove it from your wishlist.
+                  </p>
+                )}
               </div>
             </div>
           ))}

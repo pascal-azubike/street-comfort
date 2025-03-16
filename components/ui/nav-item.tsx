@@ -4,9 +4,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/store/use-cart';
 import { ShoppingCart, HeartIcon, LucideIcon, Loader2 } from 'lucide-react';
-import { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { usewishList } from '@/store/use-wishlist';
+
 
 const IconMap: Record<string, LucideIcon> = {
   ShoppingBag: ShoppingCart,

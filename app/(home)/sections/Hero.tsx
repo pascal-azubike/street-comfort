@@ -23,7 +23,7 @@ export default function Hero() {
     return (
         <div className="bg-[#462901]">
             {/* Main Content */}
-            <section className="relative min-h-screen bg-[#FDF7F5]" ref={revealRef}>
+            <section className="relative  bg-[#FDF7F5]" ref={revealRef}>
                 {/* Background Image */}
                 <Image
                     src="/33.jpg"

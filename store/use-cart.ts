@@ -17,6 +17,7 @@ export interface CartItem {
     value: string;
   }>;
   images: string[];
+  isAvailable?: boolean;
 }
 
 type ProcessingItem = {
@@ -37,6 +38,7 @@ interface CartStore {
   mergeWithDatabaseCart: () => Promise<CartItem[]>;
   isAuthenticated: boolean;
   setIsAuthenticated: (status: boolean) => void;
+  checkAvailability: () => Promise<void>;
 }
 
 // Helper function to handle errors consistently
@@ -62,31 +64,60 @@ export const useCart = create<CartStore>()(
       items: [],
       isLoading: false,
       processingItems: [] as ProcessingItem[],
-      isAuthenticated: false, // Default is false
+      isAuthenticated: false,
       setIsAuthenticated: (status: boolean) => set({ isAuthenticated: status }),
 
       setItems: items => set({ items }),
 
+      checkAvailability: async () => {
+        const items = get().items;
+        const updatedItems = await Promise.all(
+          items.map(async (item) => {
+            try {
+              const response = await fetch(`/api/products/${item._id}`);
+              return {
+                ...item,
+                isAvailable: response.ok
+              };
+            } catch (error) {
+              console.error(`Failed to check availability for item ${item._id}:`, error);
+              return {
+                ...item,
+                isAvailable: false
+              };
+            }
+          })
+        );
+        set({ items: updatedItems });
+      },
+
       addItem: async item => {
         const previousItems = get().items;
 
-        set(state => {
-          const existingItem = state.items.find(
-            i => i._id === item._id && i.size === item.size
-          );
-
-          const newItems = existingItem
-            ? state.items.map(i =>
-                i._id === item._id && i.size === item.size
-                  ? { ...i, quantity: i.quantity + item.quantity }
-                  : i
-              )
-            : [...state.items, item];
-
-          return { items: newItems, isLoading: true };
-        });
-
         try {
+          // Check if product exists before adding
+          const productResponse = await fetch(`/api/products/${item._id}`);
+          if (!productResponse.ok) {
+            toast.error('This product is no longer available');
+            return;
+          }
+
+          set(state => {
+            const existingItem = state.items.find(
+              i => i._id === item._id && i.size === item.size
+            );
+
+            const newItems = existingItem
+              ? state.items.map(i =>
+                  i._id === item._id && i.size === item.size
+                    ? { ...i, quantity: i.quantity + item.quantity, isAvailable: true }
+                    : i
+                )
+              : [...state.items, { ...item, isAvailable: true }];
+
+            return { items: newItems, isLoading: true };
+          });
+
           if (get().isAuthenticated) {
             await get().syncWithDatabase();
           }
@@ -151,6 +182,13 @@ export const useCart = create<CartStore>()(
           ? get().processingItems
           : [];
 
+        // Check if item is available before updating quantity
+        const item = get().items.find(i => i._id === itemId);
+        if (item && item.isAvailable === false) {
+          toast.error('This product is no longer available');
+          return;
+        }
+
         set({
           processingItems: [
             ...currentProcessingItems,
@@ -159,7 +197,6 @@ export const useCart = create<CartStore>()(
         });
 
         try {
-          console.log(get().isAuthenticated, 'is authenticated');
           if (get().isAuthenticated) {
             const response = await fetch('/api/cart', {
               method: 'POST',
@@ -209,7 +246,7 @@ export const useCart = create<CartStore>()(
             });
 
             if (!response.ok) {
-              throw new Error('Failed to clear cart');
+              throw new Error('Failed to sync cart with database');
             }
           }
 
@@ -222,10 +259,7 @@ export const useCart = create<CartStore>()(
       },
 
       syncWithDatabase: async () => {
-        console.log('syncing cart with database');
-        if (!get().isAuthenticated) return;
         try {
-          console.log(get().isAuthenticated);
           const response = await fetch('/api/cart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -236,52 +270,57 @@ export const useCart = create<CartStore>()(
             throw new Error('Failed to sync cart with database');
           }
         } catch (error) {
-          handleStoreError(error, 'sync cart');
-          throw error;
+          handleStoreError(error, 'sync cart with database');
         }
       },
 
       mergeWithDatabaseCart: async () => {
-        if (!get().isAuthenticated) return get().items;
-
         try {
           const response = await fetch('/api/cart');
           if (!response.ok) {
-            throw new Error('Failed to fetch database cart');
+            throw new Error('Failed to fetch cart from database');
           }
 
-          const { items: dbItems } = await response.json();
-          const localItems = get().items;
+          const { items: databaseCart } = await response.json();
+          const localCart = get().items;
 
-          const itemMap = new Map();
+          // Check availability for database items
+          const databaseItemsWithAvailability = await Promise.all(
+            (databaseCart || []).map(async (item: CartItem) => {
+              try {
+                const productResponse = await fetch(`/api/products/${item._id}`);
+                return {
+                  ...item,
+                  isAvailable: productResponse.ok
+                };
+              } catch (error) {
+                return {
+                  ...item,
+                  isAvailable: false
+                };
+              }
+            })
+          );
 
-          localItems.forEach(item => {
-            const key = `${item._id}-${item.size}`;
-            itemMap.set(key, { ...item });
-          });
-
-          dbItems.forEach((dbItem: CartItem) => {
-            const key = `${dbItem._id}-${dbItem.size}`;
-            console.log(dbItems, 'dbItems');
-            console.log(localItems, 'localItems');
-
-            if (itemMap.has(key)) {
-              const localItem = itemMap.get(key);
-              itemMap.set(key, {
+          // Merge carts, preferring database quantities for matching items
+          const mergedItems = [...localCart];
+          databaseItemsWithAvailability.forEach((dbItem: CartItem) => {
+            const existingItemIndex = mergedItems.findIndex(
+              i => i._id === dbItem._id && i.size === dbItem.size
+            );
+            if (existingItemIndex >= 0) {
+              mergedItems[existingItemIndex] = {
                 ...dbItem,
-                quantity: Math.max(localItem.quantity, dbItem.quantity),
-              });
+                quantity: dbItem.quantity,
+              };
             } else {
-              itemMap.set(key, { ...dbItem });
+              mergedItems.push(dbItem);
             }
           });
 
-          const mergedItems = Array.from(itemMap.values());
-          set({ items: mergedItems });
-          get().syncWithDatabase();
           return mergedItems;
         } catch (error) {
-          handleStoreError(error, 'sync cart with your account');
+          handleStoreError(error, 'merge carts');
           return get().items;
         }
       },
@@ -291,26 +330,31 @@ export const useCart = create<CartStore>()(
       storage: createJSONStorage(() => localStorage),
       partialize: state => ({
         items: state.items,
-        processingItems: state.processingItems,
+        isAuthenticated: state.isAuthenticated,
       }),
-      onRehydrateStorage: () => (state, error) => {
-        // Return a function that receives the store's set method
-        return (storeSet: any) => {
-          // Ensure processingItems is an array after rehydration
-          if (!Array.isArray(state?.processingItems)) {
-            storeSet({ processingItems: [] });
-          }
-        };
+      onRehydrateStorage: () => state => {
+        // Check authentication status when rehydrating
+        if (state) {
+          checkAuthentication().then(isAuthenticated => {
+            state.setIsAuthenticated(isAuthenticated);
+            state.checkAvailability();
+          });
+        }
       },
     }
   )
 );
 
 // Initialize the authentication status when the store is created
-const checkAuthentication = async () => {
-  const isAuthenticated = await isUserLoggedIn();
-  useCart.getState().setIsAuthenticated(isAuthenticated);
-};
+async function checkAuthentication() {
+  try {
+    const session = await getSession();
+    return !!session?.user;
+  } catch (error) {
+    console.error('[AUTH_CHECK]', error);
+    return false;
+  }
+}
 
 // Call the checkAuthentication function to set the initial authentication state
 checkAuthentication();

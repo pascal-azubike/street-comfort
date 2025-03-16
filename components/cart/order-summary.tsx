@@ -9,18 +9,20 @@ import { useSession } from 'next-auth/react';
 interface OrderSummaryProps {
   total: number;
   selectedAddressId?: string;
+  hasUnavailableItems?: boolean;
 }
 
 export function OrderSummary({ 
   total, 
-  selectedAddressId 
+  selectedAddressId,
+  hasUnavailableItems = false
 }: OrderSummaryProps) {
   const { items } = useCart();
   const { status } = useSession();
   const [isManualPaymentOpen, setIsManualPaymentOpen] = useState(false);
   const [transactionRef, setTransactionRef] = useState("");
 
-  const isDisabled = status !== 'authenticated' || !selectedAddressId;
+  const isDisabled = status !== 'authenticated' || !selectedAddressId || hasUnavailableItems;
 
   const handleManualPayment = () => {
     // Generate a transaction reference
@@ -53,7 +55,7 @@ export function OrderSummary({
       <div className="mt-6 space-y-4">
         <FlutterwaveCheckout 
           amount={total} 
-          items={items} 
+          items={items.filter(item => item.isAvailable !== false)} 
           disabled={isDisabled}
           addressId={selectedAddressId || ''}
           className="w-full"
@@ -61,6 +63,7 @@ export function OrderSummary({
           Pay Online
           {status !== 'authenticated' && " (Sign in required)"}
           {status === 'authenticated' && !selectedAddressId && " (Select address)"}
+          {hasUnavailableItems && " (Remove unavailable items)"}
         </FlutterwaveCheckout>
 
         <div className="relative">
@@ -81,13 +84,18 @@ export function OrderSummary({
           Bank Transfer
           {status !== 'authenticated' && " (Sign in required)"}
           {status === 'authenticated' && !selectedAddressId && " (Select address)"}
+          {hasUnavailableItems && " (Remove unavailable items)"}
         </Button>
 
         {isDisabled && (
           <p className="mt-2 text-sm text-[#593C2D]/60 text-center">
             {status !== 'authenticated' 
               ? 'Please sign in to proceed with checkout'
-              : 'Please select a delivery address to proceed'}
+              : !selectedAddressId
+              ? 'Please select a delivery address to proceed'
+              : hasUnavailableItems
+              ? 'Please remove unavailable items from your cart to proceed'
+              : null}
           </p>
         )}
       </div>
@@ -97,7 +105,7 @@ export function OrderSummary({
         onClose={() => setIsManualPaymentOpen(false)}
         amount={total}
         transactionRef={transactionRef}
-        items={items}
+        items={items.filter(item => item.isAvailable !== false)}
         addressId={selectedAddressId || ""}
       />
     </div>

@@ -6,13 +6,13 @@ import { PageHero } from '../pageHero';
 import { useCart } from '@/store/use-cart';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { Loader2, Minus, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, Loader2, Minus, Plus, Trash2 } from 'lucide-react';
 import { formatNairaPrice, cn } from '@/lib/utils';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { OrderSummary } from '@/components/cart/order-summary';
 import { AddressSelector } from '@/components/cart/address-selector';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 export default function Cart() {
   const { data: session, status } = useSession();
@@ -20,12 +20,12 @@ export default function Cart() {
   const { items, removeItem, updateQuantity, processingItems = [] } = useCart();
   const [selectedAddressId, setSelectedAddressId] = useState<string>();
 
-  const total = items.reduce(
-    (acc, item) => acc + parseInt(item.price) * item.quantity,
-    0
-  );
-
-
+  // Calculate total only from available items
+  const total = useMemo(() => {
+    return items
+      .filter(item => item.isAvailable !== false)
+      .reduce((acc, item) => acc + parseInt(item.price) * item.quantity, 0);
+  }, [items]);
 
   if (items.length === 0) {
     return (
@@ -65,7 +65,6 @@ export default function Cart() {
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-6">
             {items.map(item => {
-              // Ensure processingItems is an array and find the matching item
               const processingItem = (
                 Array.isArray(processingItems) ? processingItems : []
               ).find(p => p?.id === item._id);
@@ -75,7 +74,8 @@ export default function Cart() {
                 <div
                   key={`${item._id}-${item.size}`}
                   className={cn(
-                    'relative flex gap-6 p-4 bg-white rounded-xl border border-[#593C2D]/10',
+                    'relative flex gap-6 p-4 bg-white rounded-xl border',
+                    item.isAvailable === false ? 'border-red-300/50' : 'border-[#593C2D]/10',
                     isProcessing && 'opacity-60'
                   )}
                 >
@@ -98,15 +98,28 @@ export default function Cart() {
                       src={item.image}
                       alt={item.name}
                       fill
-                      className="object-contain"
+                      className={cn(
+                        "object-contain",
+                        item.isAvailable === false && "opacity-60"
+                      )}
                     />
+                    {item.isAvailable === false && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="bg-red-50 px-3 py-1 rounded-md">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex-1">
                     <div className="flex justify-between mb-2">
                       <Link 
                         href={`/shop/${item._id}`}
-                        className="hover:text-[#593C2D]/80 transition-colors"
+                        className={cn(
+                          "hover:text-[#593C2D]/80 transition-colors",
+                          item.isAvailable === false && "pointer-events-none"
+                        )}
                       >
                         <h3 className="font-['Playfair_Display'] text-[#593C2D]">
                           {item.name}
@@ -114,7 +127,10 @@ export default function Cart() {
                       </Link>
                       <button
                         onClick={() => removeItem(item._id)}
-                        className="text-red-500 hover:text-red-600 disabled:opacity-50"
+                        className={cn(
+                          "hover:text-red-600 disabled:opacity-50",
+                          item.isAvailable === false ? "text-red-500 bg-red-50 p-1 rounded" : "text-red-500"
+                        )}
                         disabled={isProcessing}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -125,35 +141,41 @@ export default function Cart() {
                       Size: {item.size}
                     </p>
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() =>
-                            updateQuantity(
-                              item._id,
-                              Math.max(1, item.quantity - 1)
-                            )
-                          }
-                          className="p-1 rounded-lg border border-[#593C2D]/20 text-[#593C2D] hover:border-[#593C2D] disabled:opacity-50"
-                          disabled={isProcessing}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </button>
-                        <span className="w-8 text-center">{item.quantity}</span>
-                        <button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity + 1)
-                          }
-                          className="p-1 rounded-lg border border-[#593C2D]/20 text-[#593C2D] hover:border-[#593C2D] disabled:opacity-50"
-                          disabled={isProcessing}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </button>
+                    {item.isAvailable === false ? (
+                      <div className="text-sm text-red-600 mb-4">
+                        This item is no longer available. Please remove it from your cart.
                       </div>
-                      <p className="font-medium text-[#593C2D]">
-                        ₦{formatNairaPrice(item.price)}
-                      </p>
-                    </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() =>
+                              updateQuantity(
+                                item._id,
+                                Math.max(1, item.quantity - 1)
+                              )
+                            }
+                            className="p-1 rounded-lg border border-[#593C2D]/20 text-[#593C2D] hover:border-[#593C2D] disabled:opacity-50"
+                            disabled={isProcessing || item.isAvailable === false}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </button>
+                          <span className="w-8 text-center">{item.quantity}</span>
+                          <button
+                            onClick={() =>
+                              updateQuantity(item._id, item.quantity + 1)
+                            }
+                            className="p-1 rounded-lg border border-[#593C2D]/20 text-[#593C2D] hover:border-[#593C2D] disabled:opacity-50"
+                            disabled={isProcessing || item.isAvailable === false}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
+                        <p className="font-medium text-[#593C2D]">
+                          ₦{formatNairaPrice(item.price)}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -164,6 +186,23 @@ export default function Cart() {
           <div className="relative">
             <div className="lg:sticky lg:top-24">
               <div className="bg-white rounded-xl border border-[#593C2D]/10 p-6 h-fit space-y-6">
+                {/* Show warning if there are unavailable items */}
+                {items.some(item => item.isAvailable === false) && (
+                  <div className="p-3 bg-red-50 rounded-lg border border-red-200 mb-4">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-red-800">
+                          Some items are no longer available
+                        </p>
+                        <p className="text-sm text-red-600 mt-1">
+                          Please remove unavailable items from your cart before proceeding with checkout.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {status === 'authenticated' && (
                   <div className="space-y-2">
                     <h4 className="font-medium text-[#593C2D]">Delivery Address</h4>
@@ -178,6 +217,7 @@ export default function Cart() {
                 <OrderSummary 
                   total={total} 
                   selectedAddressId={selectedAddressId}
+                  hasUnavailableItems={items.some(item => item.isAvailable === false)}
                 />
               </div>
             </div>

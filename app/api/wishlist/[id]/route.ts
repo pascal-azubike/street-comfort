@@ -20,10 +20,10 @@ export async function DELETE(req: Request) {
     const client = await clientPromise;
     const db = client.db();
 
-    await db.collection("wishlist").deleteOne({
-      _id: new ObjectId(itemId),
-      userId: session.user.id,
-    });
+    await db.collection("wishlist").updateOne(
+      { userId: session.user.id },
+      { $pull: { items: { _id: new ObjectId(itemId) } } } as any
+    );
 
     return NextResponse.json({ message: "Item removed from wishlist" });
   } catch (error) {
