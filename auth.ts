@@ -15,37 +15,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         verifyRequest: '/auth/verify-request',
     },
     callbacks: {
-        async signIn({ user, account, profile }) {
-            if (account?.provider === 'google') {
-                const client = await clientPromise;
-                const db = client.db();
-                
-                // Check if user exists with this email
-                const existingUser = await db.collection('users').findOne({
-                    email: user.email
-                });
-
-                if (existingUser) {
-                    // Link the Google account to the existing user
-                    await db.collection('accounts').updateOne(
-                        { userId: existingUser._id },
-                        { 
-                            $set: {
-                                provider: account.provider,
-                                providerAccountId: account.providerAccountId,
-                                access_token: account.access_token,
-                                id_token: account.id_token,
-                                scope: account.scope,
-                                token_type: account.token_type,
-                                expires_at: account.expires_at
-                            }
-                        },
-                        { upsert: true }
-                    );
-                }
-            }
-            return true;
-        },
         async session({ session, user }) {
             if (session?.user) {
                 // Get additional user data from database
