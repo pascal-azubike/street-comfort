@@ -96,7 +96,7 @@ export function FlutterwaveCheckout({
     customizations: {
       title: 'Street Comfort',
       description: 'Payment for your order',
-      logo: 'https://streetcomfort.ng/logo.png',
+      logo: 'https://res.cloudinary.com/dt3kpifmp/image/upload/v1742026606/sc_logow_xx4ljn.jpg',
     },
   };
 

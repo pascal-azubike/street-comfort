@@ -23,11 +23,11 @@ export default function AuthError() {
   return (
     <div>
       <PageHero 
-        title="Authentication Error" 
-        description="We encountered an issue while signing you in." 
+        title="Sign In Failed" 
+        description="We couldn't complete your sign in request." 
       />
       
-      <section className="py-20 relative min-h-screen">
+      <section className="py-8 md:py-20 relative flex-grow">
         <div className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#593C2D]/20 to-transparent" />
         <div className="container mx-auto px-4">
           <div className="max-w-xl mx-auto">
@@ -36,11 +36,11 @@ export default function AuthError() {
                 <AlertCircle className="h-8 w-8 text-[#593C2D]" />
               </div>
               
-              <div className="text-center space-y-4">
-                <h2 className="text-2xl font-['Playfair_Display'] text-[#593C2D]">
-                  Authentication Failed
+              <div className="text-center space-y-3 md:space-y-4">
+                <h2 className="text-xl md:text-2xl font-['Playfair_Display'] text-[#593C2D]">
+                  Sign In Failed
                 </h2>
-                <p className="text-[#593C2D]/60 leading-relaxed">
+                <p className="text-[#593C2D]/60 leading-relaxed text-sm md:text-base break-words">
                   {message}
                 </p>
               </div>
