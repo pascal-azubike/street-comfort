@@ -22,7 +22,7 @@ import { useCart } from '@/store/use-cart';
 import { useRouter } from 'next/navigation';
 // Import the utility functions
 import { useSession } from 'next-auth/react';
-import { usewishList } from '@/store/use-wishlist';
+import { useWishlist } from '@/store/use-wishlist';
 // import { generateMetadata } from '@/lib/metadata';
 import { Metadata } from 'next';
 
@@ -96,7 +96,7 @@ export default function ProductDetail({
   const [selectedSize, setSelectedSize] = useState<string>('');
   const params = use(paramsPromise);
   const cart = useCart();
-  const wishList = usewishList();
+  const wishList = useWishlist();
   const router = useRouter();
   const { data: session } = useSession(); // Get session data
 
@@ -260,11 +260,20 @@ export default function ProductDetail({
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button onClick={handleAddToWishlist}>
-                    {isInWishlist ? (
-                      <Heart className="text-red-500 " />
+                  <Button
+                    onClick={handleAddToWishlist}
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full"
+                  >
+                    {wishList.isItemLoading(product._id) ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
                     ) : (
-                      <HeartIcon />
+                      <Heart
+                        className={cn('h-5 w-5', {
+                          'text-red-500 fill-red-500': isInWishlist,
+                        })}
+                      />
                     )}
                   </Button>
                 </div>

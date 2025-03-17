@@ -3,57 +3,29 @@ import { auth } from "@/auth"
 import clientPromise from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
 
-// Sync cart items from local storage to database
-export async function POST(req: Request) {
-  try {
-    const session = await auth()
-    if (!session?.user) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
-    }
-
-    const item = await req.json()
-    const client = await clientPromise
-    const db = client.db()
-
-    // Check if item already exists in wishlist
-    const existingItem = await db.collection("wishlist").findOne({
-      userId: session.user.id,
-      "items._id": item._id
-    })
-
-    if (existingItem) {
-      return NextResponse.json(
-        { message: "Item already in wishlist" },
-        { status: 400 }
-      )
-    }
-
-    // Add new item to wishlist with availability status
-    await db.collection("wishlist").updateOne(
-      { userId: session.user.id },
-      { 
-        $push: { items: { ...item, addedAt: new Date() } },
-        $set: { updatedAt: new Date() },
-        $setOnInsert: { createdAt: new Date() }
-      },
-      { upsert: true }
-    )
-
-    return NextResponse.json({ message: "Item added to wishlist" }, { status: 201 })
-  } catch (error) {
-    console.error('[WISHLIST_POST]', error)
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 }
-    )
-  }
+interface WishlistItem {
+  _id: string
+  name: string
+  price: string
+  size: string
+  image: string
+  category: string
+  addedAt?: Date
 }
 
-// Get cart items for logged-in user
+interface Wishlist {
+  _id: ObjectId
+  userId: ObjectId
+  items: WishlistItem[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Get wishlist items for logged-in user
 export async function GET(req: Request) {
   try {
     const session = await auth()
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
@@ -63,15 +35,15 @@ export async function GET(req: Request) {
     // Get wishlist items
     const wishlist = await db
       .collection("wishlist")
-      .findOne(
-        { userId: session.user.id },
-        { projection: { items: 1, _id: 0 } }
-      )
+      .findOne({
+        userId: new ObjectId(session.user.id)
+      })
+
+    const currentWishlist = wishlist || { items: [] }
 
     // Check availability for each item
-    const items = wishlist?.items || []
     const itemsWithAvailability = await Promise.all(
-      items.map(async (item: any) => {
+      currentWishlist.items.map(async (item: WishlistItem) => {
         try {
           // Check if product exists in products collection using ObjectId
           const product = await db.collection("products").findOne({ 
@@ -91,9 +63,69 @@ export async function GET(req: Request) {
       })
     )
 
-    return NextResponse.json(itemsWithAvailability)
+    return NextResponse.json({
+      items: itemsWithAvailability
+    })
   } catch (error) {
     console.error('[WISHLIST_GET]', error)
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    )
+  }
+}
+
+// Add item to wishlist
+export async function POST(req: Request) {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+    }
+
+    const item = await req.json() as WishlistItem
+    const client = await clientPromise
+    const db = client.db()
+
+    // Check if product exists in products collection
+    const product = await db.collection("products").findOne({ 
+      _id: new ObjectId(item._id)
+    })
+
+    if (!product) {
+      return NextResponse.json(
+        { message: "Product not found" },
+        { status: 404 }
+      )
+    }
+
+    // Check if user already has a wishlist
+    const wishlist = await db.collection("wishlist").findOne({
+      userId: new ObjectId(session.user.id)
+    })
+
+    // Check if item already exists in wishlist
+    if (wishlist?.items?.some(i => i._id === item._id)) {
+      return NextResponse.json(
+        { message: "Item already in wishlist" },
+        { status: 400 }
+      )
+    }
+
+    // Create or update wishlist
+    await db.collection("wishlist").updateOne(
+      { userId: new ObjectId(session.user.id) },
+      { 
+        $push: { items: { ...item, addedAt: new Date() } },
+        $set: { updatedAt: new Date() },
+        $setOnInsert: { createdAt: new Date() }
+      },
+      { upsert: true }
+    )
+
+    return NextResponse.json({ message: "Item added to wishlist" }, { status: 201 })
+  } catch (error) {
+    console.error('[WISHLIST_POST]', error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

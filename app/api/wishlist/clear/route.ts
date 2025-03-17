@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import clientPromise from "@/lib/mongodb"
+import { ObjectId } from "mongodb"
 
 export async function POST(req: Request) {
   try {
     const session = await auth()
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
@@ -14,7 +15,7 @@ export async function POST(req: Request) {
 
     // Clear all items from wishlist
     await db.collection("wishlist").updateOne(
-      { userId: session.user.id },
+      { userId: new ObjectId(session.user.id) },
       { 
         $set: { 
           items: [],

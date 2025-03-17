@@ -24,11 +24,12 @@ import {
   ShoppingCart, 
   Image as ImageIcon,
   Info,
-  Users,
   Edit,
   Calendar,
   Package,
-  Tag
+  Tag,
+  ShoppingBag,
+  Eye
 } from "lucide-react";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,6 +37,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatNairaPrice } from "@/lib/utils";
+import Link from "next/link";
 
 export default function ViewProduct() {
   const params = useParams();
@@ -45,40 +47,67 @@ export default function ViewProduct() {
   const { data: productDetails, isLoading, isError } = useQuery({
     queryKey: ['product-details', productId],
     queryFn: async () => {
-      const response = await fetch(`/api/products/${productId}/admin-details`);
-      if (!response.ok) throw new Error('Failed to fetch product details');
-      return response.json();
+      try {
+        const response = await fetch(`/api/products/${productId}/admin-details`);
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to fetch product details');
+        }
+        return response.json();
+      } catch (error) {
+        console.error('Error fetching product details:', error);
+        throw error;
+      }
     },
   });
 
   if (isLoading) {
-    return <LoadingSkeleton />;
-  }
-
-  if (isError || !productDetails) {
     return (
-      <div className="container max-w-7xl mx-auto px-4 py-8">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold">Failed to load product details</h2>
-          <Button 
-            variant="ghost" 
-            onClick={() => router.back()}
-            className="mt-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Go Back
-          </Button>
-        </div>
-      </div>
+      <>
+        <PageHero
+          title="Loading Product..."
+          description="Fetching product information and statistics."
+        />
+        <LoadingSkeleton />
+      </>
     );
   }
 
-  const { product, cartDetails, wishlistDetails } = productDetails;
+  if (isError || !productDetails?.product) {
+    return (
+      <>
+        <PageHero
+          title="Error"
+          description="Unable to load product details."
+        />
+        <div className="container max-w-7xl mx-auto px-4 py-8">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold">Failed to load product details</h2>
+            <Button 
+              variant="ghost" 
+              onClick={() => router.back()}
+              className="mt-4"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Go Back
+            </Button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  const { 
+    product, 
+    cartDetails = { count: 0, users: [] }, 
+    wishlistDetails = { count: 0, users: [] },
+    orderDetails = { count: 0, users: [] }
+  } = productDetails;
 
   return (
     <>
       <PageHero
-        title="Product Details"
+        title={product.name || "Product Details"}
         description="Comprehensive view of product information and statistics."
       />
 
@@ -110,19 +139,19 @@ export default function ViewProduct() {
                 Product Gallery
               </CardTitle>
               <CardDescription>
-                {product.images.length} images available
+                {product.images?.length || 0} images available
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {product.images.map((image: string, index: number) => (
+                {product.images?.map((image: string, index: number) => (
                   <div 
                     key={index}
                     className="aspect-square relative rounded-lg overflow-hidden border group"
                   >
                     <Image
                       src={image}
-                      alt={`${product.title} - Image ${index + 1}`}
+                      alt={`${product.name} - Image ${index + 1}`}
                       fill
                       className="object-cover transition-transform group-hover:scale-110"
                     />
@@ -131,6 +160,11 @@ export default function ViewProduct() {
                     </div>
                   </div>
                 ))}
+                {(!product.images || product.images.length === 0) && (
+                  <div className="aspect-square relative rounded-lg overflow-hidden border bg-gray-100 flex items-center justify-center">
+                    <ImageIcon className="h-8 w-8 text-gray-400" />
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -145,17 +179,31 @@ export default function ViewProduct() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h3 className="font-semibold text-xl line-clamp-2">{product.title}</h3>
+                <h3 className="font-semibold text-xl line-clamp-2">{product.name}</h3>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge variant="secondary">{product.category}</Badge>
-                  {product.brand && (
-                    <Badge variant="outline">{product.brand}</Badge>
-                  )}
                 </div>
                 <p className="text-2xl font-bold text-primary mt-3">
                   {formatNairaPrice(product.price)}
                 </p>
+                {product.description && (
+                  <p className="mt-4 text-muted-foreground">{product.description}</p>
+                )}
               </div>
+
+              {product.details && product.details.length > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Product Details</p>
+                  <div className="space-y-2">
+                    {product.details.map((detail, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <span className="text-sm font-medium">{detail.key}:</span>
+                        <span className="text-sm text-muted-foreground">{detail.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
@@ -166,10 +214,17 @@ export default function ViewProduct() {
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Stock</p>
+                  <p className="text-sm text-muted-foreground">Updated</p>
                   <p className="font-medium flex items-center gap-1">
-                    <Package className="h-4 w-4" />
-                    {product.stock} units
+                    <Calendar className="h-4 w-4" />
+                    {formatDate(product.updatedAt)}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Views</p>
+                  <p className="font-medium flex items-center gap-1">
+                    <Eye className="h-4 w-4" />
+                    {product.views || 0}
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -184,6 +239,13 @@ export default function ViewProduct() {
                   <p className="font-medium flex items-center gap-1">
                     <Heart className="h-4 w-4" />
                     {wishlistDetails.count} users
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Orders</p>
+                  <p className="font-medium flex items-center gap-1">
+                    <ShoppingBag className="h-4 w-4" />
+                    {orderDetails.count} users
                   </p>
                 </div>
               </div>
@@ -203,154 +265,140 @@ export default function ViewProduct() {
             </CardContent>
           </Card>
 
-          {/* Detailed Stats Section */}
+          {/* User Engagement Section */}
           <Card className="lg:col-span-3">
             <CardHeader>
-              <CardTitle>Product Details & Engagement</CardTitle>
+              <CardTitle>User Engagement</CardTitle>
               <CardDescription>
-                Detailed information about the product and user engagement
+                View users who have interacted with this product
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="description">
-                <div className="overflow-auto pb-2">
-                  <TabsList className="w-full sm:w-auto">
-                    <TabsTrigger value="description" className="flex-shrink-0">
-                      <Info className="h-4 w-4 mr-2" />
-                      Description
-                    </TabsTrigger>
-                    <TabsTrigger value="carts" className="flex-shrink-0">
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      In Carts ({cartDetails.count})
-                    </TabsTrigger>
-                    <TabsTrigger value="wishlists" className="flex-shrink-0">
-                      <Heart className="h-4 w-4 mr-2" />
-                      In Wishlists ({wishlistDetails.count})
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
+              <Tabs defaultValue="wishlist">
+                <TabsList className="w-full justify-start">
+                  <TabsTrigger value="wishlist" className="flex items-center gap-2">
+                    <Heart className="h-4 w-4" />
+                    Wishlists ({wishlistDetails.count})
+                  </TabsTrigger>
+                  <TabsTrigger value="cart" className="flex items-center gap-2">
+                    <ShoppingCart className="h-4 w-4" />
+                    Carts ({cartDetails.count})
+                  </TabsTrigger>
+                  <TabsTrigger value="orders" className="flex items-center gap-2">
+                    <ShoppingBag className="h-4 w-4" />
+                    Orders ({orderDetails.count})
+                  </TabsTrigger>
+                </TabsList>
 
-                <TabsContent value="description">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Product Description</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="prose max-w-none">
-                        <p>{product.description}</p>
-                      </div>
-                      
-                      {product.details && product.details.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-medium mb-3">Additional Details</h4>
-                          <div className="grid gap-2">
-                            {product.details.map((detail: any, index: number) => (
-                              <div key={index} className="flex items-center gap-2 py-2 px-3 bg-muted rounded-lg">
-                                <Tag className="h-4 w-4 text-muted-foreground" />
-                                <span className="font-medium">{detail.key}:</span>
-                                <span>{detail.value}</span>
+                <TabsContent value="wishlist" className="mt-6">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-4">
+                      {wishlistDetails.users.map((user) => (
+                        <Link 
+                          href={`/users/${user.id}`}
+                          key={user.id}
+                          className="block"
+                        >
+                          <div className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center gap-4">
+                              <Avatar>
+                                <AvatarImage src={user.image} />
+                                <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{user.name}</p>
+                                <p className="text-sm text-muted-foreground">{user.email}</p>
                               </div>
-                            ))}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              Added {formatDate(user.addedAt)}
+                            </p>
                           </div>
-                        </div>
+                        </Link>
+                      ))}
+                      {wishlistDetails.users.length === 0 && (
+                        <p className="text-center text-muted-foreground py-8">
+                          No users have added this product to their wishlist
+                        </p>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </ScrollArea>
                 </TabsContent>
 
-                <TabsContent value="carts">
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center gap-2">
-                        <ShoppingCart className="h-5 w-5" />
-                        <CardTitle>Cart Engagement</CardTitle>
-                      </div>
-                      <CardDescription>
-                        Users who currently have this product in their cart
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ScrollArea className="h-[400px] pr-4">
-                        <div className="space-y-4">
-                          {cartDetails.users.map((user: any) => (
-                            <div 
-                              key={user.id} 
-                              className="flex items-center justify-between p-3 rounded-lg border"
-                            >
-                              <div className="flex items-center gap-3">
-                                <Avatar>
-                                  <AvatarImage src={user.image} />
-                                  <AvatarFallback>
-                                    {user.name?.charAt(0) || 'U'}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <p className="font-medium">{user.name}</p>
-                                  <p className="text-sm text-muted-foreground">
-                                    Added to cart
-                                  </p>
-                                </div>
+                <TabsContent value="cart" className="mt-6">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-4">
+                      {cartDetails.users.map((user) => (
+                        <Link 
+                          href={`/users/${user.id}`}
+                          key={user.id}
+                          className="block"
+                        >
+                          <div className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center gap-4">
+                              <Avatar>
+                                <AvatarImage src={user.image} />
+                                <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{user.name}</p>
+                                <p className="text-sm text-muted-foreground">{user.email}</p>
                               </div>
-                              <Badge>
-                                Qty: {user.quantity}
-                              </Badge>
                             </div>
-                          ))}
-                          {cartDetails.users.length === 0 && (
-                            <div className="text-center py-8 text-muted-foreground">
-                              No users have this product in their cart
+                            <div className="text-right">
+                              <Badge>Qty: {user.quantity}</Badge>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Updated {formatDate(user.updatedAt)}
+                              </p>
                             </div>
-                          )}
-                        </div>
-                      </ScrollArea>
-                    </CardContent>
-                  </Card>
+                          </div>
+                        </Link>
+                      ))}
+                      {cartDetails.users.length === 0 && (
+                        <p className="text-center text-muted-foreground py-8">
+                          No users have this product in their cart
+                        </p>
+                      )}
+                    </div>
+                  </ScrollArea>
                 </TabsContent>
 
-                <TabsContent value="wishlists">
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center gap-2">
-                        <Heart className="h-5 w-5" />
-                        <CardTitle>Wishlist Engagement</CardTitle>
-                      </div>
-                      <CardDescription>
-                        Users who have added this product to their wishlist
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ScrollArea className="h-[400px] pr-4">
-                        <div className="space-y-4">
-                          {wishlistDetails.users.map((user: any) => (
-                            <div 
-                              key={user.id} 
-                              className="flex items-center justify-between p-3 rounded-lg border"
-                            >
-                              <div className="flex items-center gap-3">
-                                <Avatar>
-                                  <AvatarImage src={user.image} />
-                                  <AvatarFallback>
-                                    {user.name?.charAt(0) || 'U'}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <p className="font-medium">{user.name}</p>
-                                  <p className="text-sm text-muted-foreground">
-                                    Added {formatDate(user.addedAt)}
-                                  </p>
-                                </div>
+                <TabsContent value="orders" className="mt-6">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-4">
+                      {orderDetails.users.map((user) => (
+                        <Link 
+                          href={`/users/${user.id}`}
+                          key={user.id}
+                          className="block"
+                        >
+                          <div className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center gap-4">
+                              <Avatar>
+                                <AvatarImage src={user.image} />
+                                <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{user.name}</p>
+                                <p className="text-sm text-muted-foreground">{user.email}</p>
                               </div>
                             </div>
-                          ))}
-                          {wishlistDetails.users.length === 0 && (
-                            <div className="text-center py-8 text-muted-foreground">
-                              No users have this product in their wishlist
+                            <div className="text-right">
+                              <Badge>Qty: {user.quantity}</Badge>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Ordered {formatDate(user.orderDate)}
+                              </p>
                             </div>
-                          )}
-                        </div>
-                      </ScrollArea>
-                    </CardContent>
-                  </Card>
+                          </div>
+                        </Link>
+                      ))}
+                      {orderDetails.users.length === 0 && (
+                        <p className="text-center text-muted-foreground py-8">
+                          No users have ordered this product
+                        </p>
+                      )}
+                    </div>
+                  </ScrollArea>
                 </TabsContent>
               </Tabs>
             </CardContent>
@@ -364,15 +412,17 @@ export default function ViewProduct() {
 function LoadingSkeleton() {
   return (
     <div className="container max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-6">
-        <Skeleton className="h-10 w-[100px]" />
+      <div className="flex items-center justify-between mb-6">
+        <Skeleton className="h-10 w-32" />
+        <Skeleton className="h-10 w-32" />
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <Skeleton className="h-7 w-[200px]" />
-              <Skeleton className="h-5 w-[150px]" />
+              <Skeleton className="h-7 w-48" />
+              <Skeleton className="h-5 w-32" />
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -383,40 +433,72 @@ function LoadingSkeleton() {
             </CardContent>
           </Card>
         </div>
-        <div>
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-7 w-[200px]" />
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-8 w-1/3" />
+
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-7 w-48" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <Skeleton className="h-7 w-3/4" />
+              <div className="flex items-center gap-2 mt-2">
+                <Skeleton className="h-5 w-24" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                {[1, 2, 3, 4].map((i) => (
-                  <Skeleton key={i} className="h-16" />
+              <Skeleton className="h-8 w-32 mt-3" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="space-y-1">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-5 w-24" />
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <Skeleton className="h-4 w-32 mb-2" />
+              <div className="flex flex-wrap gap-2">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-6 w-16" />
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="lg:col-span-3">
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-7 w-[250px]" />
-              <Skeleton className="h-5 w-[200px]" />
-            </CardHeader>
-            <CardContent>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <Skeleton className="h-7 w-48" />
+            <Skeleton className="h-5 w-64" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full max-w-md" />
               <div className="space-y-4">
-                <Skeleton className="h-10 w-[300px]" />
-                <Skeleton className="h-[400px] w-full" />
+                {[1, 2, 3].map((i) => (
+                  <div 
+                    key={i}
+                    className="flex items-center justify-between p-4 rounded-lg border"
+                  >
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <div>
+                        <Skeleton className="h-5 w-32" />
+                        <Skeleton className="h-4 w-48 mt-1" />
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Skeleton className="h-5 w-16" />
+                      <Skeleton className="h-4 w-24 mt-1" />
+                    </div>
+                  </div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
-} 
+}

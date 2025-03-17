@@ -24,7 +24,7 @@ import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { usewishList } from '@/store/use-wishlist';
+import {useWishlist} from '@/store/use-wishlist';
 import { Metadata } from 'next'
 import { generateMetadata } from '@/app/lib/metadata';
 import { FloatingNav } from '@/components/ui/floating-navbar';
@@ -98,7 +98,7 @@ export default function ShopComponent() {
   const { ref, inView } = useInView();
   const cart = useCart();
   const { data: session } = useSession();
-  const wishList = usewishList();
+  const wishList = useWishlist();
 
   // Get initial values from URL
   const [selectedCategory, setSelectedCategory] = useState<string[]>(
@@ -379,23 +379,47 @@ export default function ShopComponent() {
                                     )}`}
                                   />
                                   {/* Wishlist Icon */}
-                                  <button 
+                                  <Button
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
-                                      handleWishlistClick(e, product);
+                                      
+                                      if (!session) {
+                                        toast.error('Please login to add items to wishlist');
+                                        router.push('/auth/signin');
+                                        return;
+                                      }
+                                      
+                                      if (wishList.isInWishlist(product._id)) {
+                                        wishList.removeItem(product._id);
+                                      } else {
+                                        wishList.addItem({
+                                          _id: product._id,
+                                          name: product.name,
+                                          price: product.price,
+                                          size: '',
+                                          image: product.images[0],
+                                          category: product.category,
+                                        });
+                                      }
                                     }}
-                                    className="absolute top-4 right-4 p-2 rounded-full bg-white/80 backdrop-blur-sm 
-                                               md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300
-                                               hover:bg-white text-[#593C2D]/60 hover:text-[#593C2D] z-20"
+                                    size="icon"
+                                    variant="ghost"
+                                    className="absolute right-4 top-4 p-2 rounded-full bg-white/80 backdrop-blur-sm 
+                                             md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300
+                                             hover:bg-white text-[#593C2D]/60 hover:text-[#593C2D] z-20"
                                   >
-                                    <Heart 
-                                      className={cn(
-                                        "h-6 w-6",
-                                        wishList.isInWishlist(product._id) && "fill-current text-red-500"
-                                      )}
-                                    />
-                                  </button>
+                                    {wishList.isItemLoading(product._id) ? (
+                                      <Loader2 className="h-6 w-6 animate-spin" />
+                                    ) : (
+                                      <Heart 
+                                        className={cn(
+                                          "h-6 w-6",
+                                          wishList.isInWishlist(product._id) && "fill-current text-red-500"
+                                        )}
+                                      />
+                                    )}
+                                  </Button>
                                   {/* Add to Bag Button */}
                                   <div className="absolute inset-0 flex items-end justify-center 
                                                     md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 
