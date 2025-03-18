@@ -23,7 +23,7 @@ export default function Cart() {
   // Calculate total only from available items
   const total = useMemo(() => {
     return items
-      .filter(item => item.isAvailable !== false)
+      .filter(item => item.isAvailable)
       .reduce((acc, item) => acc + parseInt(item.price) * item.quantity, 0);
   }, [items]);
 
@@ -75,7 +75,7 @@ export default function Cart() {
                   key={`${item._id}-${item.size}`}
                   className={cn(
                     'relative flex gap-6 p-4 bg-white rounded-xl border',
-                    item.isAvailable === false ? 'border-red-300/50' : 'border-[#593C2D]/10',
+                    !item.isAvailable ? 'border-red-300/50' : 'border-[#593C2D]/10',
                     isProcessing && 'opacity-60'
                   )}
                 >
@@ -100,10 +100,10 @@ export default function Cart() {
                       fill
                       className={cn(
                         "object-contain",
-                        item.isAvailable === false && "opacity-60"
+                        !item.isAvailable ? "opacity-60" : ""
                       )}
                     />
-                    {item.isAvailable === false && (
+                    {!item.isAvailable && (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="bg-red-50 px-3 py-1 rounded-md">
                           <AlertTriangle className="h-4 w-4 text-red-500" />
@@ -118,7 +118,7 @@ export default function Cart() {
                         href={`/shop/${item._id}`}
                         className={cn(
                           "hover:text-[#593C2D]/80 transition-colors",
-                          item.isAvailable === false && "pointer-events-none"
+                          !item.isAvailable && "pointer-events-none"
                         )}
                       >
                         <h3 className="font-['Playfair_Display'] text-[#593C2D]">
@@ -129,7 +129,7 @@ export default function Cart() {
                         onClick={() => removeItem(item._id)}
                         className={cn(
                           "hover:text-red-600 disabled:opacity-50",
-                          item.isAvailable === false ? "text-red-500 bg-red-50 p-1 rounded" : "text-red-500"
+                          !item.isAvailable ? "text-red-500 bg-red-50 p-1 rounded" : "text-red-500"
                         )}
                         disabled={isProcessing}
                       >
@@ -141,7 +141,7 @@ export default function Cart() {
                       Size: {item.size}
                     </p>
 
-                    {item.isAvailable === false ? (
+                    {!item.isAvailable ? (
                       <div className="text-sm text-red-600 mb-4">
                         This item is no longer available. Please remove it from your cart.
                       </div>
@@ -156,7 +156,7 @@ export default function Cart() {
                               )
                             }
                             className="p-1 rounded-lg border border-[#593C2D]/20 text-[#593C2D] hover:border-[#593C2D] disabled:opacity-50"
-                            disabled={isProcessing || item.isAvailable === false}
+                            disabled={isProcessing || !item.isAvailable}
                           >
                             <Minus className="h-4 w-4" />
                           </button>
@@ -166,7 +166,7 @@ export default function Cart() {
                               updateQuantity(item._id, item.quantity + 1)
                             }
                             className="p-1 rounded-lg border border-[#593C2D]/20 text-[#593C2D] hover:border-[#593C2D] disabled:opacity-50"
-                            disabled={isProcessing || item.isAvailable === false}
+                            disabled={isProcessing || !item.isAvailable}
                           >
                             <Plus className="h-4 w-4" />
                           </button>
@@ -187,7 +187,7 @@ export default function Cart() {
             <div className="lg:sticky lg:top-24">
               <div className="bg-white rounded-xl border border-[#593C2D]/10 p-6 h-fit space-y-6">
                 {/* Show warning if there are unavailable items */}
-                {items.some(item => item.isAvailable === false) && (
+                {items.some(item => !item.isAvailable) && (
                   <div className="p-3 bg-red-50 rounded-lg border border-red-200 mb-4">
                     <div className="flex items-start gap-2">
                       <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
@@ -217,7 +217,7 @@ export default function Cart() {
                 <OrderSummary 
                   total={total} 
                   selectedAddressId={selectedAddressId}
-                  hasUnavailableItems={items.some(item => item.isAvailable === false)}
+                  hasUnavailableItems={items.some(item => !item.isAvailable)}
                 />
               </div>
             </div>

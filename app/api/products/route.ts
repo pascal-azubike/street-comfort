@@ -144,7 +144,7 @@ export async function GET(request: NextRequest) {
       // Lookup wishlist counts
       {
         $lookup: {
-          from: "wishlists",
+          from: "wishlist",
           let: { productId: { $toString: "$_id" } },
           pipeline: [
             {
@@ -159,11 +159,30 @@ export async function GET(request: NextRequest) {
           as: "wishlistCount"
         }
       },
+      // Lookup order counts
+      {
+        $lookup: {
+          from: "orders",
+          let: { productId: { $toString: "$_id" } },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ["$$productId", "$items._id"]
+                }
+              }
+            },
+            { $count: "count" }
+          ],
+          as: "orderCount"
+        }
+      },
       // Add computed fields
       {
         $addFields: {
           cartCount: { $ifNull: [{ $arrayElemAt: ["$cartCount.count", 0] }, 0] },
-          wishlistCount: { $ifNull: [{ $arrayElemAt: ["$wishlistCount.count", 0] }, 0] }
+          wishlistCount: { $ifNull: [{ $arrayElemAt: ["$wishlistCount.count", 0] }, 0] },
+          orderCount: { $ifNull: [{ $arrayElemAt: ["$orderCount.count", 0] }, 0] }
         }
       }
     )
