@@ -1,5 +1,23 @@
 import clientPromise from "@/lib/mongodb"
-import { ObjectId } from "mongodb"
+import { ObjectId, Document } from "mongodb"
+
+interface WishlistItem {
+  _id: string
+  name: string
+  price: string
+  size: string
+  image: string
+  category: string
+  addedAt: Date
+}
+
+interface Wishlist extends Document {
+  _id: ObjectId
+  userId: ObjectId
+  items: WishlistItem[]
+  createdAt: Date
+  updatedAt: Date
+}
 
 async function cleanupWishlist() {
   try {
@@ -27,17 +45,17 @@ async function cleanupWishlist() {
 
     for (const userWishlists of duplicateWishlists) {
       const userId = userWishlists._id
-      const wishlists = userWishlists.docs
+      const wishlists = userWishlists.docs as Wishlist[]
 
       // Sort by creation date, keep the oldest one
-      wishlists.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+      wishlists.sort((a: Wishlist, b: Wishlist) => a.createdAt.getTime() - b.createdAt.getTime())
       const oldestWishlist = wishlists[0]
       const otherWishlists = wishlists.slice(1)
 
       console.log(`Processing user ${userId}: ${wishlists.length} wishlists found`)
 
       // Get all unique items from all wishlists
-      const allItems = new Map()
+      const allItems = new Map<string, WishlistItem>()
       wishlists.forEach(wishlist => {
         wishlist.items?.forEach(item => {
           if (!allItems.has(item._id)) {

@@ -105,7 +105,7 @@ export async function POST(req: Request) {
     })
 
     // Check if item already exists in wishlist
-    if (wishlist?.items?.some(i => i._id === item._id)) {
+    if (wishlist?.items?.some((i: any) => i._id === item._id)) {
       return NextResponse.json(
         { message: "Item already in wishlist" },
         { status: 400 }
@@ -115,8 +115,8 @@ export async function POST(req: Request) {
     // Create or update wishlist
     await db.collection("wishlist").updateOne(
       { userId: new ObjectId(session.user.id) },
-      { 
-        $push: { items: { ...item, addedAt: new Date() } },
+      {
+        $push: { 'items': { ...item, addedAt: new Date() } } as any,
         $set: { updatedAt: new Date() },
         $setOnInsert: { createdAt: new Date() }
       },
