@@ -293,7 +293,7 @@ export default function ViewProduct() {
                 <TabsContent value="wishlist" className="mt-6">
                   <ScrollArea className="h-[400px]">
                     <div className="space-y-4">
-                      {wishlistDetails.users.map((user) => (
+                      {wishlistDetails.users.map((user:any) => (
                         <Link 
                           href={`/users/${user.id}`}
                           key={user.id}
@@ -328,7 +328,7 @@ export default function ViewProduct() {
                 <TabsContent value="cart" className="mt-6">
                   <ScrollArea className="h-[400px]">
                     <div className="space-y-4">
-                      {cartDetails.users.map((user) => (
+                      {cartDetails.users.map((user:any) => (
                         <Link 
                           href={`/users/${user.id}`}
                           key={user.id}
@@ -366,7 +366,7 @@ export default function ViewProduct() {
                 <TabsContent value="orders" className="mt-6">
                   <ScrollArea className="h-[400px]">
                     <div className="space-y-4">
-                      {orderDetails.users.map((user) => (
+                      {orderDetails.users.map((user:any) => (
                         <Link 
                           href={`/users/${user.id}`}
                           key={user.id}
