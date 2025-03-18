@@ -195,7 +195,7 @@ export default function ViewProduct() {
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">Product Details</p>
                   <div className="space-y-2">
-                    {product.details.map((detail, index) => (
+                    {product.details.map((detail:any, index:any) => (
                       <div key={index} className="flex items-start gap-2">
                         <span className="text-sm font-medium">{detail.key}:</span>
                         <span className="text-sm text-muted-foreground">{detail.value}</span>
