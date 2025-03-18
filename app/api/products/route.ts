@@ -68,14 +68,6 @@ export async function GET(request: NextRequest) {
     // Build the aggregation pipeline
     const pipeline: any[] = []
 
-    // Add a stage to convert string numbers to actual numbers for sorting
-    pipeline.push({
-      $addFields: {
-        numericPrice: { $toDouble: "$price" }, // Convert price to number
-        numericStock: { $toInt: "$stock" },    // Convert stock to number if you have it
-      }
-    })
-
     if (search && search.trim() !== '') {
       pipeline.push({
         $search: {
@@ -115,6 +107,14 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    // Add a stage to convert string numbers to actual numbers for sorting
+    pipeline.push({
+      $addFields: {
+        numericPrice: { $toDouble: "$price" },
+        numericStock: { $toInt: "$stock" }
+      }
+    })
+
     if (category && category !== 'all') {
       pipeline.push({
         $match: { category: category }
@@ -132,7 +132,26 @@ export async function GET(request: NextRequest) {
             {
               $match: {
                 $expr: {
-                  $in: ["$$productId", "$items._id"]
+                  $and: [
+                    { $isArray: "$items" },
+                    {
+                      $gt: [
+                        {
+                          $reduce: {
+                            input: "$items",
+                            initialValue: 0,
+                            in: {
+                              $add: [
+                                "$$value",
+                                { $cond: [{ $eq: ["$$this._id", "$$productId"] }, 1, 0] }
+                              ]
+                            }
+                          }
+                        },
+                        0
+                      ]
+                    }
+                  ]
                 }
               }
             },
@@ -150,7 +169,26 @@ export async function GET(request: NextRequest) {
             {
               $match: {
                 $expr: {
-                  $in: ["$$productId", "$items._id"]
+                  $and: [
+                    { $isArray: "$items" },
+                    {
+                      $gt: [
+                        {
+                          $reduce: {
+                            input: "$items",
+                            initialValue: 0,
+                            in: {
+                              $add: [
+                                "$$value",
+                                { $cond: [{ $eq: ["$$this._id", "$$productId"] }, 1, 0] }
+                              ]
+                            }
+                          }
+                        },
+                        0
+                      ]
+                    }
+                  ]
                 }
               }
             },
@@ -168,7 +206,26 @@ export async function GET(request: NextRequest) {
             {
               $match: {
                 $expr: {
-                  $in: ["$$productId", "$items._id"]
+                  $and: [
+                    { $isArray: "$items" },
+                    {
+                      $gt: [
+                        {
+                          $reduce: {
+                            input: "$items",
+                            initialValue: 0,
+                            in: {
+                              $add: [
+                                "$$value",
+                                { $cond: [{ $eq: ["$$this._id", "$$productId"] }, 1, 0] }
+                              ]
+                            }
+                          }
+                        },
+                        0
+                      ]
+                    }
+                  ]
                 }
               }
             },
