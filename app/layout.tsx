@@ -9,6 +9,7 @@ import { SessionProvider } from "next-auth/react"
 import { Toaster } from "sonner"
 import { CartSyncHandler } from "@/components/cart-sync-handler"
 import Script from "next/script"
+import { OnlineStatusProvider } from "../components/providers/online-status-provider"
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -27,7 +28,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
-        <Script 
+        <Script
           src="https://checkout.flutterwave.com/v3.js"
           strategy="lazyOnload"
         />
@@ -37,7 +38,9 @@ export default async function RootLayout({
           <ClientSetup>
             <CartSyncHandler />
             <FloatingNav />
-            {children}
+            <OnlineStatusProvider>
+              {children}
+            </OnlineStatusProvider>
             <Toaster />
           </ClientSetup>
         </SessionProvider>
