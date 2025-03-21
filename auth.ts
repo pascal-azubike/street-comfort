@@ -42,7 +42,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         },
                         { upsert: true }
                     );
+                } else {
+                    // For new users, ensure createdAt is set
+                    await db.collection('users').updateOne(
+                        { email: user.email },
+                        { 
+                            $setOnInsert: { 
+                                createdAt: new Date().toISOString(),
+                                role: 'user',
+                                status: 'active'
+                            }
+                        },
+                        { upsert: true }
+                    );
                 }
+            } else {
+                // For email/password sign in, ensure createdAt is set for new users
+                const client = await clientPromise;
+                const db = client.db();
+                await db.collection('users').updateOne(
+                    { email: user.email },
+                    { 
+                        $setOnInsert: { 
+                            createdAt: new Date().toISOString(),
+                            role: 'user',
+                            status: 'active'
+                        }
+                    },
+                    { upsert: true }
+                );
             }
             return true;
         },
