@@ -69,42 +69,108 @@ export async function GET(request: NextRequest) {
     const pipeline: any[] = []
 
     if (search && search.trim() !== '') {
-      pipeline.push({
-        $search: {
-          index: "products_search",
-          compound: {
-            should: [
-              {
-                text: {
-                  query: search.trim(),
-                  path: "title",
-                  score: { boost: { value: 3 } }
-                }
-              },
-              {
-                text: {
-                  query: search.trim(),
-                  path: "description",
-                  score: { boost: { value: 2 } }
-                }
-              },
-              {
-                text: {
-                  query: search.trim(),
-                  path: "category",
-                  score: { boost: { value: 1 } }
-                }
+      // Try to match as ObjectId first
+      try {
+        if (search.trim().length >= 12) {
+          pipeline.push({
+            $match: {
+              $or: [
+                { _id: new ObjectId(search.trim()) },
+                { _id: { $regex: search.trim(), $options: 'i' } }
+              ]
+            }
+          })
+        } else {
+          pipeline.push({
+            $search: {
+              index: "default",
+              compound: {
+                should: [
+                  {
+                    text: {
+                      query: search.trim(),
+                      path: "_id",
+                      score: { boost: { value: 5 } }
+                    }
+                  },
+                  {
+                    text: {
+                      query: search.trim(),
+                      path: "name",
+                      score: { boost: { value: 3 } }
+                    }
+                  },
+                  {
+                    text: {
+                      query: search.trim(),
+                      path: "description",
+                      score: { boost: { value: 2 } }
+                    }
+                  },
+                  {
+                    text: {
+                      query: search.trim(),
+                      path: "category",
+                      score: { boost: { value: 1 } }
+                    }
+                  }
+                ]
               }
-            ]
+            }
+          })
+          // Add search score for text search results
+          pipeline.push({
+            $addFields: {
+              searchScore: { $meta: "searchScore" }
+            }
+          })
+        }
+      } catch (error) {
+        // If ObjectId parsing fails, use text search
+        pipeline.push({
+          $search: {
+            index: "default",
+            compound: {
+              should: [
+                {
+                  text: {
+                    query: search.trim(),
+                    path: "_id",
+                    score: { boost: { value: 5 } }
+                  }
+                },
+                {
+                  text: {
+                    query: search.trim(),
+                    path: "name",
+                    score: { boost: { value: 3 } }
+                  }
+                },
+                {
+                  text: {
+                    query: search.trim(),
+                    path: "description",
+                    score: { boost: { value: 2 } }
+                  }
+                },
+                {
+                  text: {
+                    query: search.trim(),
+                    path: "category",
+                    score: { boost: { value: 1 } }
+                  }
+                }
+              ]
+            }
           }
-        }
-      })
-
-      pipeline.push({
-        $addFields: {
-          searchScore: { $meta: "searchScore" }
-        }
-      })
+        })
+        // Add search score for text search results
+        pipeline.push({
+          $addFields: {
+            searchScore: { $meta: "searchScore" }
+          }
+        })
+      }
     }
 
     // Add a stage to convert string numbers to actual numbers for sorting
@@ -207,18 +273,15 @@ export async function GET(request: NextRequest) {
               $match: {
                 $expr: {
                   $and: [
-                    { $isArray: "$items" },
+                    { $isArray: "$orderItems" },
                     {
                       $gt: [
                         {
-                          $reduce: {
-                            input: "$items",
-                            initialValue: 0,
-                            in: {
-                              $add: [
-                                "$$value",
-                                { $cond: [{ $eq: ["$$this._id", "$$productId"] }, 1, 0] }
-                              ]
+                          $size: {
+                            $filter: {
+                              input: "$orderItems",
+                              as: "item",
+                              cond: { $eq: ["$$item.productId", "$$productId"] }
                             }
                           }
                         },
@@ -251,6 +314,10 @@ export async function GET(request: NextRequest) {
           return 'numericPrice'
         case 'stock':
           return 'numericStock'
+        case 'orderCount':
+        case 'cartCount':
+        case 'wishlistCount':
+          return field
         default:
           return field
       }

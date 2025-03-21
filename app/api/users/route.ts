@@ -83,7 +83,14 @@ export async function GET(request: NextRequest) {
               else: 0
             }
           },
-          orderCount: { $ifNull: [{ $arrayElemAt: ["$orderCount.total", 0] }, 0] }
+          orderCount: { $ifNull: [{ $arrayElemAt: ["$orderCount.total", 0] }, 0] },
+          lastActive: { 
+            $cond: {
+              if: "$lastActive",
+              then: { $toString: "$lastActive" }, // Convert Date to ISO string
+              else: null
+            }
+          }
         }
       },
       // Remove unnecessary fields
@@ -97,43 +104,37 @@ export async function GET(request: NextRequest) {
     );
 
     // Add sorting
+    const sortField = sortBy === 'lastActive' ? 'lastActive' : sortBy;
     pipeline.push({
       $sort: {
-        [sortBy]: sortDirection === 'asc' ? 1 : -1
+        [sortField]: sortDirection === 'asc' ? 1 : -1
       }
     });
 
-    // Get total count
-    const countPipeline = [...pipeline];
-    countPipeline.push({ $count: "total" });
-
     // Add pagination
+    const totalPipeline = [...pipeline];
     pipeline.push(
       { $skip: skip },
       { $limit: pageSize }
     );
 
-    const [users, totalResults] = await Promise.all([
-      db.collection("users")
-        .aggregate(pipeline)
-        .toArray(),
-      db.collection("users")
-        .aggregate(countPipeline)
-        .toArray()
+    const [users, totalCount] = await Promise.all([
+      db.collection('users').aggregate(pipeline).toArray(),
+      db.collection('users').aggregate([...totalPipeline, { $count: 'total' }]).toArray()
     ]);
 
-    const total = totalResults[0]?.total || 0;
+    const total = totalCount[0]?.total || 0;
+    const totalPages = Math.ceil(total / pageSize);
 
     return NextResponse.json({
       users,
-      total,
-      totalPages: Math.ceil(total / pageSize),
-      currentPage: page,
-      pageSize
+      page,
+      pageSize,
+      totalPages,
+      total
     });
-
   } catch (error) {
     console.error('[USERS_GET]', error);
     return new NextResponse("Internal error", { status: 500 });
   }
-} 
+}

@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plus, MoreHorizontal, Eye, Edit, Archive, Trash2, Loader2, Search, Filter, ArrowUpDown, RefreshCcw, ShoppingCart, Heart } from "lucide-react";
+import { Plus, MoreHorizontal, Eye, Edit, Archive, Trash2, Loader2, Search, Filter, ArrowUpDown, RefreshCcw, ShoppingCart, Heart, ShoppingBag, Copy, Check } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -64,6 +64,7 @@ type Product = {
   brand?: string;
   cartCount: number;
   wishlistCount: number;
+  orderCount: number;
 };
 
 // Table loading skeleton
@@ -82,6 +83,8 @@ function TableRowSkeleton() {
         </div>
       </TableCell>
       <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
       <TableCell className="text-right"><Skeleton className="h-8 w-8 rounded-full ml-auto" /></TableCell>
     </TableRow>
   );
@@ -91,6 +94,7 @@ function ProductActions({ product }: { product: Product }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [hasCopied, setHasCopied] = useState(false);
 
   const { refetch } = useQuery({
     queryKey: ['products'],
@@ -100,6 +104,18 @@ function ProductActions({ product }: { product: Product }) {
       return response.json();
     }
   });
+
+  const copyId = async () => {
+    try {
+      await navigator.clipboard.writeText(product._id);
+      setHasCopied(true);
+      toast.success("Product ID copied to clipboard");
+      setTimeout(() => setHasCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      toast.error("Failed to copy product ID");
+    }
+  };
 
   const handleDelete = async () => {
     setIsLoading(true);
@@ -135,6 +151,22 @@ function ProductActions({ product }: { product: Product }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem onClick={copyId}>
+            {hasCopied ? (
+              <>
+                <Check className="mr-2 h-4 w-4 text-green-600" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy className="mr-2 h-4 w-4" />
+                Copy ID
+              </>
+            )}
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
           <DropdownMenuItem onClick={() => router.push(`/products/${product._id}`)}>
             <Eye className="mr-2 h-4 w-4" />
             View Details
@@ -301,13 +333,13 @@ export default function ManageProductsPage() {
                   <div className="relative">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search by title, description..."
+                      placeholder="Search by name, ID, category..."
+                      className="pl-8"
                       value={search}
                       onChange={(e) => {
                         setSearch(e.target.value);
                         setPage(1);
                       }}
-                      className="pl-8"
                     />
                     {isFetching && (
                       <div className="absolute right-2 top-2.5">
@@ -403,6 +435,13 @@ export default function ManageProductsPage() {
                       </div>
                     </TableHead>
                     <TableHead>
+                      <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleSort('orderCount')}>
+                        <ShoppingBag className="h-4 w-4" />
+                        Orders
+                        <ArrowUpDown className="h-4 w-4" />
+                      </div>
+                    </TableHead>
+                    <TableHead>
                       <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleSort('cartCount')}>
                         <ShoppingCart className="h-4 w-4" />
                         Cart
@@ -426,7 +465,7 @@ export default function ManageProductsPage() {
                     ))
                   ) : products.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7}>
+                      <TableCell colSpan={8}>
                         <div className="text-center py-12">
                           <Archive className="mx-auto h-12 w-12 text-muted-foreground" />
                           <h3 className="mt-2 text-sm font-semibold">No products</h3>
@@ -472,6 +511,11 @@ export default function ManageProductsPage() {
                           </div>
                         </TableCell>
                         <TableCell>{formatNairaPrice(product.price.toString())}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {product.orderCount || 0}
+                          </Badge>
+                        </TableCell>
                         <TableCell>
                           <Badge variant="secondary">
                             {product.cartCount}
@@ -579,4 +623,4 @@ export default function ManageProductsPage() {
       </section>
     </>
   );
-} 
+}

@@ -40,9 +40,11 @@ import {
   ArrowUpDown,
   ShoppingCart,
   Heart,
-  Package
+  Package,
+  CircleDot
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserStatusBadge } from "@/components/ui/user-status-badge";
 
 type User = {
   _id: string;
@@ -55,6 +57,7 @@ type User = {
   wishlistCount: number;
   orderCount: number;
   createdAt: string;
+  lastActive?: Date;
 };
 
 function TableRowSkeleton() {
@@ -71,6 +74,7 @@ function TableRowSkeleton() {
         </div>
       </TableCell>
       <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
       <TableCell><Skeleton className="h-4 w-16" /></TableCell>
       <TableCell><Skeleton className="h-4 w-16" /></TableCell>
       <TableCell><Skeleton className="h-4 w-16" /></TableCell>
@@ -184,7 +188,8 @@ export default function ManageUsersPage() {
       const response = await fetch(`/api/users?${params}`);
       if (!response.ok) throw new Error('Failed to fetch users');
       return response.json();
-    }
+    },
+    refetchInterval: 30000, // Refetch every 30 seconds to keep status up to date
   });
 
   const users: User[] = data?.users || [];
@@ -281,6 +286,12 @@ export default function ManageUsersPage() {
                       </div>
                     </TableHead>
                     <TableHead>
+                      <div className="flex items-center gap-2">
+                        <CircleDot className="h-4 w-4" />
+                        Status
+                      </div>
+                    </TableHead>
+                    <TableHead>
                       <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleSort('cartCount')}>
                         <ShoppingCart className="h-4 w-4" />
                         Cart
@@ -311,52 +322,40 @@ export default function ManageUsersPage() {
                     ))
                   ) : users.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-12">
-                        <p className="text-muted-foreground">No users found</p>
+                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                        No users found
                       </TableCell>
                     </TableRow>
                   ) : (
                     users.map((user, index) => (
                       <TableRow key={user._id}>
-                        <TableCell className="font-medium">
-                          {(page - 1) * pageSize + index + 1}
-                        </TableCell>
+                        <TableCell>{((page - 1) * pageSize) + index + 1}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar>
                               <AvatarImage src={user.image} />
-                              <AvatarFallback>
-                                {user.name?.charAt(0) || 'U'}
-                              </AvatarFallback>
+                              <AvatarFallback>{user.name?.[0]?.toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium">{user.name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {user.email}
-                              </p>
+                              <div className="font-medium">{user.name}</div>
+                              <div className="text-sm text-muted-foreground">{user.email}</div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                          <Badge variant={user.role === "admin" ? "default" : "secondary"}>
                             {user.role}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="secondary">
-                            {user.cartCount}
-                          </Badge>
+                          <UserStatusBadge 
+                            userEmail={user.email} 
+                            showLastSeen={true}
+                          />
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">
-                            {user.wishlistCount}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">
-                            {user.orderCount}
-                          </Badge>
-                        </TableCell>
+                        <TableCell>{user.cartCount}</TableCell>
+                        <TableCell>{user.wishlistCount}</TableCell>
+                        <TableCell>{user.orderCount}</TableCell>
                         <TableCell className="text-right">
                           <UserActions user={user} />
                         </TableCell>
@@ -371,4 +370,4 @@ export default function ManageUsersPage() {
       </section>
     </>
   );
-} 
+}
