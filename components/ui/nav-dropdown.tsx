@@ -8,22 +8,14 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, User, Package, ShoppingBag, Heart, Settings, LogOut, LayoutDashboard, Users, ClipboardList, ShoppingCart, FileText, MapPin, Edit } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Session } from "next-auth";
+
 import { NavItem } from "./nav-item";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 
-interface ExtendedUser {
-  role?: string
-  name?: string | null
-  email?: string | null
-  image?: string | null
-}
 
-interface ExtendedSession extends Session {
-  user?: ExtendedUser
-  expires: string
-}
+
+
 
 interface NavDropdownProps {
   navItems: {
@@ -36,7 +28,7 @@ interface NavDropdownProps {
   isMobile?: boolean;
   triggerIcon?: "menu" | "user";
   className?: string;
-  session?: ExtendedSession | null;
+  session?: any;
   variant?: 'default' | 'floating';
 }
 
