@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useOnlineStatus } from "@/components/providers/online-status-provider";
-import { format, isValid } from "date-fns";
+import { format, isValid, formatDistanceToNowStrict, differenceInDays } from "date-fns";
 
 interface UserStatusBadgeProps {
   userEmail: string;
@@ -27,7 +27,19 @@ export function UserStatusBadge({
     if (!date) return "";
     const dateObj = new Date(date);
     if (!isValid(dateObj)) return "";
-    return format(dateObj, "PP");
+    
+    const now = new Date();
+    const daysDifference = differenceInDays(now, dateObj);
+    
+    if (daysDifference >= 3) {
+      return format(dateObj, "MMM d, yyyy"); // Show date for 3+ days ago
+    }
+    
+    // Use strict formatting for more precise times
+    return formatDistanceToNowStrict(dateObj, { 
+      addSuffix: true,
+      roundingMethod: 'floor'
+    });
   };
 
   return (
@@ -39,7 +51,7 @@ export function UserStatusBadge({
         )}
       />
       <span className="text-sm font-medium capitalize">
-        {status}
+        {status === "offline" ? "Last seen" : status}
       </span>
       {showLastSeen && status !== "online" && lastSeen && (
         <span className="text-xs text-muted-foreground truncate">
