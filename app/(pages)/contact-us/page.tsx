@@ -39,7 +39,7 @@ export default function ContactPage() {
               </div>
               <h3 className="text-lg font-semibold text-[#593C2D] mb-2">Address</h3>
               <p className="text-[#593C2D]/60 mb-4">Visit our store.</p>
-              <p className="text-[#593C2D] font-medium">Jl. Wilis no.13, Lagos</p>
+              <p className="text-[#593C2D] font-medium">Shop 8 Humanity complex Opposite Gilbert bank road, Ado Ekiti</p>
             </div>
 
             {/* Email */}
@@ -50,7 +50,7 @@ export default function ContactPage() {
               <h3 className="text-lg font-semibold text-[#593C2D] mb-2">Email</h3>
               <p className="text-[#593C2D]/60 mb-4">Contact us anytime.</p>
               <p className="text-[#593C2D] font-medium hover:text-[#462901] cursor-pointer transition-colors">
-                shimmer.info@mail.com
+              streetcomfort100@gmail.com
               </p>
             </div>
 
@@ -61,7 +61,7 @@ export default function ContactPage() {
               </div>
               <h3 className="text-lg font-semibold text-[#593C2D] mb-2">Working Hours</h3>
               <p className="text-[#593C2D]/60 mb-4">Open Week Days</p>
-              <p className="text-[#593C2D] font-medium">7 PM - 9 AM, Mon - Sat</p>
+              <p className="text-[#593C2D] font-medium">7 AM - 9 PM, Mon - Sat</p>
             </div>
           </div>
         </div>

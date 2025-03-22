@@ -17,6 +17,7 @@ function SocialIcon({ href, icon: Icon }: { href: string; icon: any }) {
   return (
     <Link
       href={href}
+      target="_blank"
       className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center 
         hover:bg-white hover:text-[#462901] transform hover:-translate-y-1 
         transition-all duration-300 group"
@@ -111,14 +112,14 @@ export default function Footer() {
               </p>
             </div>
             <p className="reveal delay-3 text-white/80 text-[14px] font-roboto leading-[26px] mb-6">
-              Jl. Wilis no.13, Malang<br />
-              Email: shimmer.info@mail.com<br />
+              Shop 8 Humanity complex Opposite Gilbert bank road, Ado Ekiti<br />
+              Email: streetcomfort100@gmail.com<br />
               Phone: +234 806 028 3727
             </p>
             <div className="reveal delay-4 flex gap-4">
-              <SocialIcon href="#" icon={Facebook} />
-              <SocialIcon href="#" icon={Twitter} />
-              <SocialIcon href="#" icon={Instagram} />
+              <SocialIcon href="https://www.facebook.com/share/1AaRfPbwcr/?mibextid=LQQJ4d" icon={Facebook}  />
+              <SocialIcon href=" https://www.tiktok.com/@streets.comfort?_r=1&_d=ef5jbla9a85fec&sec_uid=MS4wLjABAAAAT6nbU2V1QP2HvAT2lcPDwFH4DzTarWgJ1UYrx0GdZOgtjUXkdqnv-zYz2ttuAwFZ&share_author_id=7412996662284010502&sharer_language=en&source=h5_m&u_code=e1c1gfigf6aae0&ug_btm=b6880,b5836&sec_user_id=MS4wLjABAAAAEECZbiu9foQU72gssJJFxLX950FuljWp69jkx5ESPbiv4eksRnwTSh7AbYksJtug&utm_source=copy&social_share_type=5&utm_campaign=client_share&utm_medium=ios&tt_from=copy&user_id=7089928892009890822&enable_checksum=1&share_link_id=E321D190-C6A8-4052-8EEB-B039F9E7C5F6&share_app_id=1233" icon={Twitter} />
+              <SocialIcon href=" https://www.instagram.com/dstreetcomfort?igsh=MXgwcGYwY202czJ1Nw==" icon={Instagram} />
             </div>
           </div>
         </div>
