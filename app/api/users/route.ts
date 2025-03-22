@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       // Wishlist count
       {
         $lookup: {
-          from: "wishlists",
+          from: "wishlist",
           localField: "_id",
           foreignField: "userId",
           pipeline: [{ $limit: 1 }],
