@@ -15,19 +15,12 @@ import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { Session } from 'next-auth';
+
 
 import { NavDropdown } from './nav-dropdown';
 import { navigationItems } from '@/config/navigation';
 
-interface ExtendedSession extends Session {
-  user?: {
-    role?: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
-}
+
 
 interface FloatingNavProps {
   onApplyFilters?: (filters: { category: string[]; sort: string; sizes: string[] }) => void;
@@ -94,7 +87,7 @@ export function FloatingNav({ onApplyFilters, onResetFilters }: FloatingNavProps
               ))}
               <NavDropdown
                 navItems={navigationItems}
-                session={session as ExtendedSession}
+                session={session}
                 variant="floating"
               />
               {shopButton && (
@@ -112,7 +105,7 @@ export function FloatingNav({ onApplyFilters, onResetFilters }: FloatingNavProps
           <div className="lg:hidden flex-1 flex items-center">
             {/* Empty div for spacing */}
             <div className="w-10" /> {/* This matches the width of the menu icon */}
-            
+
             {/* Shop Filter Button - Mobile Only */}
             {isShopPage && (
               <div className=" md:hidden flex-1 flex justify-center">
@@ -127,13 +120,13 @@ export function FloatingNav({ onApplyFilters, onResetFilters }: FloatingNavProps
                     align="center"
                     className="w-80 rounded-xl bg-white/90 backdrop-blur-sm border border-white/20"
                   >
-                    <ShopFilters 
+                    <ShopFilters
                       variant="dropdown"
                       selectedCategory={['all']}
                       selectedSort="newest"
                       selectedSizes={[]}
-                      onApplyFilters={onApplyFilters || (() => {})}
-                      onResetFilters={onResetFilters || (() => {})}
+                      onApplyFilters={onApplyFilters || (() => { })}
+                      onResetFilters={onResetFilters || (() => { })}
                     />
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -147,7 +140,7 @@ export function FloatingNav({ onApplyFilters, onResetFilters }: FloatingNavProps
                 isMobile
                 triggerIcon="menu"
                 variant="floating"
-                session={session as ExtendedSession}
+                session={session}
               />
             </div>
           </div>
