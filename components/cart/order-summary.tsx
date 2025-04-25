@@ -5,6 +5,7 @@ import { ManualPaymentDialog } from "../payment/manual-payment-dialog";
 import { useState } from "react";
 import { useCart } from '@/store/use-cart';
 import { useSession } from 'next-auth/react';
+import Image from 'next/image';
 
 interface OrderSummaryProps {
   total: number;
@@ -31,6 +32,25 @@ export function OrderSummary({
     setIsManualPaymentOpen(true);
   };
 
+  const handleWhatsAppCheckout = () => {
+    // Format the order details for WhatsApp
+    const orderDetails = items
+      .filter(item => item.isAvailable !== false)
+      .map(item => `${item.name} (${item.size}) x${item.quantity} - ₦${formatNairaPrice(item.price)}`
+      ).join('\n');
+
+    const message = `*New Order from Street Comfort*\n\n` +
+      `*Order Details:*\n${orderDetails}\n\n` +
+      `*Total Amount:* ₦${formatNairaPrice(total.toString())}\n\n` +
+      `*Note:* This is a WhatsApp order request. Our team will contact you for confirmation and payment details.`;
+
+    // Create WhatsApp URL
+    const whatsappUrl = `https://wa.me/2347035226775?text=${encodeURIComponent(message)}`;
+    
+    // Open WhatsApp in a new tab
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
     <div className="lg:sticky lg:top-24 bg-[#FDF7F5] p-6 rounded-xl h-fit z-[50]">
       <h3 className="text-xl font-['Playfair_Display'] text-[#593C2D] mb-6">
@@ -53,7 +73,9 @@ export function OrderSummary({
       </div>
 
       <div className="mt-6 space-y-4">
-        <FlutterwaveCheckout 
+        {/* Temporarily disabled Flutterwave checkout */}
+<div>
+  {/* <FlutterwaveCheckout
           amount={total} 
           items={items.filter(item => item.isAvailable !== false)} 
           disabled={isDisabled}
@@ -64,16 +86,7 @@ export function OrderSummary({
           {status !== 'authenticated' && " (Sign in required)"}
           {status === 'authenticated' && !selectedAddressId && " (Select address)"}
           {hasUnavailableItems && " (Remove unavailable items)"}
-        </FlutterwaveCheckout>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-[#FDF7F5] px-2 text-muted-foreground">Or</span>
-          </div>
-        </div>
+        </FlutterwaveCheckout> */}
 
         <Button
           variant="outline"
@@ -86,6 +99,36 @@ export function OrderSummary({
           {status === 'authenticated' && !selectedAddressId && " (Select address)"}
           {hasUnavailableItems && " (Remove unavailable items)"}
         </Button>
+
+        {isDisabled && status !== 'authenticated' && (
+          <p className="mt-2 text-sm text-[#593C2D]/60 text-center">
+            Please sign in to proceed with checkout
+          </p>
+        )}
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-[#FDF7F5] px-2 text-muted-foreground">Or</span>
+          </div>
+        </div>
+
+        <Button
+          variant="outline"
+          className="w-full bg-[#25D366] hover:bg-[#25D366]/90 text-white border-0 flex items-center justify-center gap-2 py-6"
+          onClick={handleWhatsAppCheckout}
+        >
+          <Image 
+            src="/whatsapp-logo.png" 
+            alt="WhatsApp" 
+            width={24} 
+            height={24}
+          />
+          <span>Order via WhatsApp</span>
+        </Button>
+      </div>
 
         {isDisabled && (
           <p className="mt-2 text-sm text-[#593C2D]/60 text-center">

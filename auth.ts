@@ -32,7 +32,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     callbacks: {
         async signIn({ user, account, profile }) {
-            
+            try {
                 const client = await clientPromise;
                 const db = client.db();
 
@@ -40,6 +40,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 const existingUser = await db.collection('users').findOne({
                     email: user.email
                 });
+
                 if (!existingUser) {
                     // New user - set default role and creation date
                     await db.collection('users').updateOne(
@@ -55,48 +56,57 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 }
 
                 if (account?.provider === 'google') {
-                    if (existingUser) {
-                        // Link the Google account to the existing user
-                        await db.collection('accounts').updateOne(
-                            { userId: existingUser._id },
-                            {
-                                $set: {
-                                    provider: account.provider,
-                                    providerAccountId: account.providerAccountId,
-                                    access_token: account.access_token,
-                                    id_token: account.id_token,
-                                    scope: account.scope,
-                                    token_type: account.token_type,
-                                    expires_at: account.expires_at
-                                }
-                            },
-                            { upsert: true }
-                        );
-                    }
+                    const userId = existingUser ? existingUser._id : new ObjectId();
+                    await db.collection('accounts').updateOne(
+                        { userId: userId },
+                        {
+                            $set: {
+                                provider: account.provider,
+                                providerAccountId: account.providerAccountId,
+                                access_token: account.access_token,
+                                id_token: account.id_token,
+                                scope: account.scope,
+                                token_type: account.token_type,
+                                expires_at: account.expires_at
+                            }
+                        },
+                        { upsert: true }
+                    );
                 }
                 return true;
-            },
+            } catch (error) {
+                console.error('Error during sign in:', error);
+                return false;
+            }
+        },
         async session({ session, user }) {
-            console.log('im inside sessing in auth.ts')
+            try {
                 if (session?.user) {
-                    // Get additional user data from database
-                    const client = await clientPromise
-                    const db = client.db()
+                    const client = await clientPromise;
+                    const db = client.db();
 
                     const dbUser = await db.collection('users').findOne({
                         _id: new ObjectId(user.id)
-                    })
+                    });
 
-                    // Add role to session
+                    if (!dbUser) {
+                        console.error('User not found in database');
+                        return session;
+                    }
+
                     session.user = {
                         ...session.user,
                         id: user.id,
-                        role: dbUser?.role || 'user', // Default to 'user' if no role is set
-                        createdAt: dbUser?.createdAt || new Date() // Include creation date
-                    }
+                        role: dbUser.role || 'user',
+                        createdAt: dbUser.createdAt || new Date()
+                    };
                 }
-                return session
+                return session;
+            } catch (error) {
+                console.error('Error in session callback:', error);
+                return session;
             }
+        }
         },
         providers: [
             Google({
