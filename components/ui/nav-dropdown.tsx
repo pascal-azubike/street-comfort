@@ -62,11 +62,6 @@ const userMenuItems = [
 
 const adminMenuItems = [
   {
-    label: "Create Blog",
-    href: "/blog/create",
-    icon: FileText
-  },
-  {
     label: "Create Product",
     href: "/products/create",
     icon: Package
