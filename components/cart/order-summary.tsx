@@ -45,7 +45,7 @@ export function OrderSummary({
       `*Note:* This is a WhatsApp order request. Our team will contact you for confirmation and payment details.`;
 
     // Create WhatsApp URL
-    const whatsappUrl = `https://wa.me/2347035226775?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/2348060283727?text=${encodeURIComponent(message)}`;
     
     // Open WhatsApp in a new tab
     window.open(whatsappUrl, '_blank');
