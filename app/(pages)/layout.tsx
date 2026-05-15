@@ -20,7 +20,7 @@ export default async function PagesLayout({
                 
                 {/* WhatsApp Floating Button */}
                 <a
-                    href="https://wa.me/2348060283727" // Updated WhatsApp number
+                    href="https://wa.me/2347035226775" // Updated WhatsApp number
                     target="_blank"
                     rel="noopener noreferrer"
                     className="fixed bottom-6 right-6 bg-green-500 text-white p-3 rounded-full shadow-lg hover:bg-green-600 transition-all duration-300 z-50 flex items-center justify-center"
