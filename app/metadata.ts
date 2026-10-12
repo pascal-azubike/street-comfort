@@ -1,7 +1,7 @@
 export const siteMetadata = {
   title: "Street Comfort | Premium Nigerian Streetwear Brand",
   description: "Experience authentic Nigerian streetwear featuring premium quality hoodies, t-shirts, and urban fashion. Shop our exclusive collection of street-style clothing that blends Nigerian culture with modern design. Free shipping available across Nigeria.",
-  siteUrl: "https://www.streetcomfortwear.com",
+  siteUrl: "https://www.streetcomfortx.com",
   keywords: [
     "Nigerian streetwear",
     "street fashion Lagos",
@@ -45,7 +45,7 @@ export const siteMetadata = {
     cardType: "summary_large_image"
   },
   alternateLanguages: {
-    "en-NG": "https://www.streetcomfortwear.com",
+    "en-NG": "https://www.streetcomfortx.com",
   },
 
   robots: {
@@ -62,6 +62,6 @@ export const siteMetadata = {
   monetization: "", // Optional: Web Monetization API payment pointer
   author: {
     name: "Street Comfort",
-    url: "https://www.streetcomfortwear.com"
+    url: "https://www.streetcomfortx.com"
   }
 } 
