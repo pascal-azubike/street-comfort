@@ -30,55 +30,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         error: '/auth/error',
         verifyRequest: '/auth/verify-request',
     },
-    callbacks: {
-        async signIn({ user, account, profile }) {
+    events: {
+        // Runs after the adapter has created the user, so the real user doc gets the defaults
+        async createUser({ user }) {
             try {
                 const client = await clientPromise;
                 const db = client.db();
-
-                // Check if user exists with this email
-                const existingUser = await db.collection('users').findOne({
-                    email: user.email
-                });
-
-                if (!existingUser) {
-                    // New user - set default role and creation date
-                    await db.collection('users').updateOne(
-                        { email: user.email },
-                        {
-                            $set: {
-                                role: 'user',
-                                createdAt: new Date()
-                            }
-                        },
-                        { upsert: true }
-                    );
-                }
-
-                if (account?.provider === 'google') {
-                    const userId = existingUser ? existingUser._id : new ObjectId();
-                    await db.collection('accounts').updateOne(
-                        { userId: userId },
-                        {
-                            $set: {
-                                provider: account.provider,
-                                providerAccountId: account.providerAccountId,
-                                access_token: account.access_token,
-                                id_token: account.id_token,
-                                scope: account.scope,
-                                token_type: account.token_type,
-                                expires_at: account.expires_at
-                            }
-                        },
-                        { upsert: true }
-                    );
-                }
-                return true;
+                await db.collection('users').updateOne(
+                    { _id: new ObjectId(user.id!) },
+                    { $set: { role: 'user', createdAt: new Date() } }
+                );
             } catch (error) {
-                console.error('Error during sign in:', error);
-                return false;
+                console.error('Error setting defaults for new user:', error);
             }
         },
+    },
+    callbacks: {
         async session({ session, user }) {
             try {
                 if (session?.user) {
@@ -256,8 +223,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                                 <div class="footer">
                                     <p>Street Comfort Nigeria</p>
                                     <div class="footer-links">
-                                        <a href="https://www.streetcomfortwear.com" class="footer-button">Home</a>
-                                        <a href="https://www.streetcomfortwear.com/shop" class="footer-button">Shop</a>
+                                        <a href="https://www.streetcomfortx.com" class="footer-button">Home</a>
+                                        <a href="https://www.streetcomfortx.com/shop" class="footer-button">Shop</a>
                                     </div>
                                     <p>This email was sent to ${email}</p>
                                 </div>
