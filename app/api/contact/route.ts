@@ -143,8 +143,8 @@ export async function POST(req: Request) {
                         
                         <div class="footer">
                             <div class="links">
-                                <a href="https://www.streetcomfortwear.com" class="button">Visit Website</a>
-                                <a href="https://www.streetcomfortwear.com/shop" class="button">Shop Now</a>
+                                <a href="https://www.streetcomfortx.com" class="button">Visit Website</a>
+                                <a href="https://www.streetcomfortx.com/shop" class="button">Shop Now</a>
                             </div>
                             
                             <div class="contact-info">
